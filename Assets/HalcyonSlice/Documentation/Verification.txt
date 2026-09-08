@@ -1,0 +1,5 @@
+FIRST WEATHER VERIFICATION PASSED
+3295 assertions; all authored story branches fit larger text.
+40 pages / 2241 narrative words on study + rest route.
+Reading estimate at 200–250 words/minute: 9.0–11.2 minutes, plus map choices and puzzle.
+This is automated verification, not a human playtest.
