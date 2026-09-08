@@ -2,7 +2,19 @@
 
 A Unity game prototype by **Bergen Carloss**.
 
-## Latest update: First Weather v0.1 — September 8, 2026
+## Latest update: map interface v0.2 — September 8, 2026
+
+The map now uses full-width artwork, Cormorant Garamond headings, brass details, smaller location labels, a foldable timetable and an illustrated Pressure barometer with a live needle. The instrument also appears beside dialogue. Existing story text, progression and saves remain compatible.
+
+The map layout check found **zero issues across 1,596 text measurements**. The Mac app resumed an existing afternoon save at Pressure 57 with one slot remaining. See the [interface update](Assets/HalcyonSlice/Documentation/InterfaceUpdate.md) and [v0.2 verification](Assets/HalcyonSlice/Documentation/InterfaceQA.md).
+
+### Current development workflow
+
+At Bergen's direction, continue the next phase in **Unity and GitHub**. Do not rebuild or package the downloadable game until that phase is finished, unless Bergen explicitly requests a build. The dial's visual direction is approved. Bergen intends to write the dialogue; the existing draft remains provisional.
+
+The recommended next milestone is an explorable map: smooth trackpad panning and controlled zoom, location markers anchored to the artwork, clear unlock states and a reliable return to the district overview. Layered depth and animated water, boats and lighting follow once movement is comfortable. These features are planned and are not included in v0.2.
+
+## Playable foundation: First Weather v0.1
 
 **First Weather** adds a playable, illustrated narrative slice covering Molly's first two days at Halcyon Academy. Choose a mentor, balance study, rest and company, carry those decisions into the next morning, and meet Lola in the greenhouse. A two-stage garden puzzle leads to one of two explicit story endings.
 
@@ -41,6 +53,8 @@ To build locally, install Unity's Mac Build Support and choose **Halcyon → 4 B
 ## Documentation and credits
 
 - [September 8 update and remaining work](CHANGELOG.md)
+- [Map interface changes and artwork sources](Assets/HalcyonSlice/Documentation/InterfaceUpdate.md)
+- [Map interface verification](Assets/HalcyonSlice/Documentation/InterfaceQA.md)
 - [Full play instructions and prototype scope](Assets/HalcyonSlice/Documentation/README.md)
 - [Test results and limitations](Assets/HalcyonSlice/Documentation/QA.md)
 - [Human playtest worksheet](Assets/HalcyonSlice/Documentation/CapstonePlaytests.md)

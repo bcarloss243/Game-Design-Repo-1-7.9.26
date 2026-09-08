@@ -1,5 +1,18 @@
 # Change log
 
+## Map interface v0.2 — September 8, 2026
+
+The original permanent map sidebar obscured the city and the UI did not carry the illustrated art direction. This pass gives the city image the full screen, with serif headings, fine brass borders, smaller location backplates and a foldable timetable. Available and unavailable locations use filled/hollow diamond pins plus written status.
+
+The Pressure gauge now uses an illustrated brass-and-ivory housing with a live 0–100 scale, needle and numeric reading. The instrument appears on the map and beside dialogue. Cormorant Garamond, its SIL Open Font License, and the generated housing's prompt/provenance accompany the source.
+
+- Editor-only preview controls cover seven existing map phases and suppress story saving during previews.
+- The final map text-fit check passed **1,596 measurements with zero issues**, across phases, two text settings and three Pressure readings. The existing story verifier passed **3,295 assertions**.
+- The v0.2 Mac build succeeded with zero errors and one Unity Services symbol-upload warning. The standalone app resumed the existing afternoon save at Pressure 57, with study completed and one slot remaining. Timetable folding/reopening was checked. See [InterfaceQA.md](Assets/HalcyonSlice/Documentation/InterfaceQA.md) for verification limits.
+- Story dialogue, activity rules and save format remain unchanged. Panning/zooming, layered depth, animated scenery and broader menu/dialogue styling are follow-up work.
+
+This source update includes the map presentation, instrument, font/license, editor preview and verification documentation. Existing Unity-generated settings and font-cache changes remain outside the commit. Following Bergen's updated workflow, further work will update Unity and GitHub; downloadable builds resume when the next phase is complete.
+
 ## First Weather v0.1 — September 8, 2026
 
 ### Playable addition

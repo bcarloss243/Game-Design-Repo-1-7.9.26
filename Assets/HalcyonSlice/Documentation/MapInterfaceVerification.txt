@@ -1,0 +1,2 @@
+MAP INTERFACE LAYOUT: 0 issues across 1596 text measurements.
+7 phases x 2 text settings x 3 Pressure readings (0, 54, 100).

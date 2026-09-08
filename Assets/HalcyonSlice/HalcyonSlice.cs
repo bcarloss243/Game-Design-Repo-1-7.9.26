@@ -9,7 +9,7 @@ using TMPro;
 
 namespace Halcyon.FirstWeather
 {
-    public class HalcyonSlice : MonoBehaviour
+    public partial class HalcyonSlice : MonoBehaviour
     {
         const string SaveKey = "Halcyon.FirstWeather.Save.v1";
         public SliceState state = new SliceState();
@@ -22,6 +22,18 @@ namespace Halcyon.FirstWeather
         readonly List<Button> buttons = new List<Button>();
         readonly Dictionary<string, Texture2D> art = new Dictionary<string, Texture2D>();
         bool title = true, modal, largeText, quietMotion, muted;
+        #if UNITY_EDITOR
+        bool interfacePreview;
+        public void PreviewMapInterface(string phase = "arrival", bool? biggerText = null, int pressure = 54)
+        {
+            if (modal) CloseModal();
+            interfacePreview = true; title = false;
+            state = new SliceState { phase = phase, pressure = Mathf.Clamp(pressure, 0, 100), day = phase == "morning2" || phase == "class2" || phase == "corridor" || phase == "homecoming" ? 2 : 1 };
+            if (biggerText.HasValue) largeText = biggerText.Value;
+            displayedPressure = state.pressure;
+            Render();
+        }
+        #endif
         string modalKind = "", gardenMessage = "";
         int noticePage;
         float displayedPressure, fade = 1, lastAction = -10;
@@ -60,7 +72,7 @@ namespace Halcyon.FirstWeather
             if (!title && !modal && !state.finished) state.playSeconds += Time.unscaledDeltaTime;
             displayedPressure = quietMotion ? state.pressure : Mathf.Lerp(displayedPressure, state.pressure, Time.unscaledDeltaTime * 3);
             if (needle != null)
-                needle.localEulerAngles = new Vector3(0, 0, Mathf.Lerp(65, -65, displayedPressure / 100f) + (quietMotion || modal ? 0 : Mathf.Sin(Time.unscaledTime * 2.5f) * displayedPressure / 130f));
+                needle.localEulerAngles = new Vector3(0, 0, Mathf.Lerp(120, -120, displayedPressure / 100f) + (quietMotion || modal ? 0 : Mathf.Sin(Time.unscaledTime * 2.5f) * displayedPressure / 130f));
             if (gaugeValue != null) gaugeValue.text = Mathf.RoundToInt(displayedPressure) + " / 100";
             if (screenFade != null) { fade = quietMotion ? 1 : Mathf.MoveTowards(fade, 1, Time.unscaledDeltaTime * 4); screenFade.alpha = fade; }
             float level = muted ? 0 : modal ? .025f : .055f;
@@ -92,8 +104,15 @@ namespace Halcyon.FirstWeather
             if (ambience != null && ambience.clip != null) Destroy(ambience.clip);
             if (clickClip != null) Destroy(clickClip);
             if (canvas != null) Destroy(canvas.gameObject);
+            ReleasePresentation();
         }
-        public void Save() { PlayerPrefs.SetString(SaveKey, JsonUtility.ToJson(state)); PlayerPrefs.Save(); }
+        public void Save()
+        {
+            #if UNITY_EDITOR
+            if (interfacePreview) return;
+            #endif
+            PlayerPrefs.SetString(SaveKey, JsonUtility.ToJson(state)); PlayerPrefs.Save();
+        }
         void SaveSettings()
         {
             PlayerPrefs.SetInt("Halcyon.LargeText", largeText ? 1 : 0);
@@ -112,11 +131,20 @@ namespace Halcyon.FirstWeather
         }
         public void NewGame()
         {
+            #if UNITY_EDITOR
+            interfacePreview = false;
+            #endif
             title = false; modal = false; state = new SliceState();
             state.Note("Arrived in Halcyon. Begin at Molly's residence; morning routines open the city.");
             Save(); Render();
         }
-        void ResumeGame() { if (Load()) { title = false; displayedPressure = state.pressure; Render(); } else NewGame(); }
+        void ResumeGame()
+        {
+            #if UNITY_EDITOR
+            interfacePreview = false;
+            #endif
+            if (Load()) { title = false; displayedPressure = state.pressure; Render(); } else NewGame();
+        }
         public void StartStory(string key)
         {
             state.view = "story"; state.story = key; state.page = 0; Save(); Render();
@@ -237,7 +265,7 @@ namespace Halcyon.FirstWeather
             Button(screen, "How to play", 72, 755, 173, 45, () => OpenModal("help"), true, false, 18);
             Button(screen, "Settings", 258, 755, 173, 45, () => OpenModal("settings"), true, false, 18);
             Button(screen, "Credits", 444, 755, 183, 45, () => OpenModal("credits"), true, false, 18);
-            Text(screen, "A capstone prototype by Bergen Carloss  ·  v0.1", 72, 838, 590, 28, 16, brass);
+            Text(screen, "A capstone prototype by Bergen Carloss  ·  v0.2", 72, 838, 590, 28, 16, brass);
             Button(screen, "Quit", 1468, 835, 95, 42, Quit, true, false, 18);
         }
         string TimeLabel()
@@ -259,63 +287,8 @@ namespace Halcyon.FirstWeather
                 default: return "Explore your first days in Halcyon.";
             }
         }
-        void DrawMap()
-        {
-            Picture(screen, "map", 0, 0, 1600, 900);
-            Panel(screen, 0, 76, 335, 824, ink); Panel(screen, 334, 76, 2, 824, brass);
-            Header(TimeLabel());
-            Text(screen, "THE CITY UNDER GLASS", 365, 101, 800, 36, 19, cream, true);
-            Text(screen, "YOUR TIMETABLE", 30, 117, 285, 40, 19, brass, true);
-            Text(screen, Objective(), 30, 175, 274, 168, 27, cream);
-            Panel(screen, 30, 366, 270, 1, brass);
-            Text(screen, "WHAT YOU CARRY", 30, 399, 270, 38, 17, brass, true);
-            string flags = (state.studied ? "Prepared assignment\n" : "") + (state.rested ? "Recognized the signs\n" : "") + (state.socialized ? "A familiar face: Jules\n" : "");
-            if (flags == "") flags = state.day == 1 ? "A new room.\nA city of possibilities." : "A fresh start.";
-            Text(screen, flags, 30, 449, 273, 130, 22, cream);
-            DrawGauge(screen, 48, 628);
-            bool morning = state.phase == "arrival" || state.phase == "morning2";
-            bool afternoon = state.phase == "afternoon";
-            bool greenhouse = state.phase == "corridor" || state.phase == "homecoming";
-            Location("RESIDENCE", morning ? "Start here" : afternoon ? (state.slots > 0 ? "Rest / end day" : "Sleep") : "Morning complete", 420, 300,
-                morning || afternoon, () => {
-                    if (morning) StartStory(state.day == 1 ? "morning1" : "morning2");
-                    else if (state.slots == 0) StartStory("night"); else OpenModal("residence");
-                }, true);
-            Location("THE ACADEMY", state.phase == "class1" || state.phase == "class2" ? "Class is beginning" : morning ? "Morning routine first" : "Class complete", 858, 245,
-                state.phase == "class1" || state.phase == "class2", () => StartStory(state.phase), state.phase != "arrival");
-            Location("READING ROOM", state.studied ? "Prepared" : "+12 Pressure · 1 slot", 700, 467, state.CanActivity("study"), () => DoActivity("study"), state.studied);
-            Location("CANAL STEPS", state.socialized ? "Jules is a familiar face" : "−9 Pressure · 1 slot", 991, 650, state.CanActivity("social"), () => DoActivity("social"), state.socialized);
-            Location("GREENHOUSE", greenhouse ? (state.phase == "homecoming" ? "A place to return to" : "A quieter place") : "Undiscovered", 1210, 408, greenhouse,
-                () => { if (state.phase == "homecoming") { state.finished = true; state.view = "ending"; Save(); Render(); } else StartStory("greenhouse"); }, state.phase == "homecoming");
-            Panel(screen, 362, 819, 1211, 56, new Color(ink.r, ink.g, ink.b, .95f));
-            Text(screen, "Bright markers: available   /   Muted markers: closed or undiscovered   /   Click a place to enter", 385, 835, 1180, 36, 19, cream);
-        }
-        void Location(string label, string sub, float x, float y, bool active, Action action, bool known)
-        {
-            Panel(screen, x + 115, y - 28, 2, 30, active ? mint : new Color32(160, 162, 152, 255));
-            var b = Button(screen, label + "\n<size=17>" + sub + "</size>", x, y, 270, 78, action, active, active, 23);
-            if (!known && !active) b.image.color = new Color32(91, 92, 91, 255);
-        }
-        void DrawGauge(Transform parent, float x, float y)
-        {
-            Panel(parent, x - 15, y - 18, 250, 245, new Color32(36, 46, 47, 255));
-            Text(parent, "MOLLY'S PRESSURE", x, y - 1, 220, 32, 16, brass, true, TextAlignmentOptions.Center);
-            Vector2 center = new Vector2(x + 110, y + 121);
-            for (int i = 0; i <= 20; i++)
-            {
-                float a = Mathf.Lerp(-155, -25, i / 20f) * Mathf.Deg2Rad;
-                Vector2 v = center + new Vector2(Mathf.Cos(a), Mathf.Sin(a)) * 90;
-                var tick = Panel(parent, v.x, v.y, 2, i % 5 == 0 ? 16 : 8, brass).rectTransform;
-                tick.localEulerAngles = new Vector3(0, 0, -Mathf.Lerp(-65, 65, i / 20f));
-            }
-            Text(parent, "0", x + 10, y + 105, 30, 30, 15, cream);
-            Text(parent, "100", x + 181, y + 105, 40, 30, 15, cream);
-            needle = Panel(parent, center.x, center.y, 3, 73, mint).rectTransform;
-            needle.pivot = new Vector2(.5f, 0); needle.anchoredPosition = new Vector2(center.x, -center.y);
-            Panel(parent, center.x - 5, center.y - 5, 10, 10, brass);
-            gaugeValue = Text(parent, state.pressure + " / 100", x, y + 132, 220, 37, 29, cream, true, TextAlignmentOptions.Center);
-            Text(parent, state.Zone, x, y + 177, 220, 30, 18, mint, false, TextAlignmentOptions.Center);
-        }
+        void DrawMap() { DrawMapPresentation(); }
+        void DrawGauge(Transform parent, float x, float y) { DrawInstrument(parent, x - 12, y - 16, 252); }
         void DrawStory()
         {
             var pages = SliceStory.Get(state.story, state);
@@ -455,7 +428,7 @@ namespace Halcyon.FirstWeather
             else
             {
                 string content = kind == "help" ? "Play as Molly through two short days at the first cross-Ward Academy. Begin each morning at your residence. Follow the map's bright markers. After the first class, choose how to spend two afternoon slots. Your choices change tomorrow.\n\nThe Pressure gauge describes strain: 0–19 Clarity; 20–44 Steady; 45–69 Elevated; 70–100 Overwhelmed. Lower is easier. Pressure never blocks the greenhouse or a relationship.\n\nIn the greenhouse, balance six water measures across three beds, then adapt to a light change. Restore both arrangements for Garden Restored, or leave a note for Work in Progress. Both complete the story.\n\nClick buttons, or use Tab / Shift+Tab and Enter. Space advances a story page without choices. J opens the journal, M mutes audio, Esc pauses. Progress saves after each choice.\n\nContent note: an anxiety/panic episode is described in text. No flashing imagery, forced breathing, or timed responses. Read at your own pace."
-                    : kind == "credits" ? "Concept, world, characters & creative direction\nBergen Carloss\n\nPrototype programming, draft scene writing & original synthesized audio\nCreated with OpenAI Codex under Bergen's direction\n\nEnvironment illustrations\nAI-generated with OpenAI image generation, using the supplied character reference as the art direction. These are prototype assets.\n\nTitle illustration\nUser-supplied Halcyon Academy reference. Its original creator and publication rights still need to be recorded before public distribution.\n\nTechnology\nUnity 6.3 LTS · Unity UI / TextMesh Pro · Unity Input System. This slice uses Unity audio directly. Existing Ink, DOTween and FMOD packages remain part of the surrounding project; their notices are retained there.\n\nA fictional city inspired by New Orleans. Draft scenes and mentor/classmate names added for this prototype remain open to creative revision.\n\nFull dependency notices accompany the project in ThirdPartyNotices.txt."
+                    : kind == "credits" ? "Concept, world, characters & creative direction\nBergen Carloss\n\nPrototype programming, draft scene writing & original synthesized audio\nCreated with OpenAI Codex under Bergen's direction\n\nEnvironment illustrations\nAI-generated with OpenAI image generation, using the supplied character reference as the art direction. These are prototype assets.\n\nTitle illustration\nUser-supplied Halcyon Academy reference. Its original creator and publication rights still need to be recorded before public distribution.\n\nBarometer housing\nGenerated with OpenAI image generation for this UI pass; scale, needle and readings are drawn live in Unity.\n\nDisplay typography\nCormorant Garamond by Christian Thalmann and the Cormorant Project Authors, SIL Open Font License 1.1. The full license is included in Dependency licenses.\n\nTechnology\nUnity 6.3 LTS · Unity UI / TextMesh Pro · Unity Input System. This slice uses Unity audio directly. Existing Ink, DOTween and FMOD packages remain part of the surrounding project; their notices are retained there.\n\nA fictional city inspired by New Orleans. Draft scenes and mentor/classmate names added for this prototype remain open to creative revision.\n\nFull dependency notices accompany the project in ThirdPartyNotices.txt."
                     : state.journal.Count == 0 ? "Your story begins at the residence." : "DAY " + state.day + "  /  " + state.Zone + "\n\n" + string.Join("\n\n", state.journal.ToArray());
                 if (kind == "licenses")
                 {
