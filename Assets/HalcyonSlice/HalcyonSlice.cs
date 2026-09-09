@@ -28,6 +28,7 @@ namespace Halcyon.FirstWeather
         {
             if (modal) CloseModal();
             interfacePreview = true; title = false;
+            academyExterior = false;
             state = new SliceState { phase = phase, pressure = Mathf.Clamp(pressure, 0, 100), day = phase == "morning2" || phase == "class2" || phase == "corridor" || phase == "homecoming" ? 2 : 1 };
             if (biggerText.HasValue) largeText = biggerText.Value;
             displayedPressure = state.pressure;
@@ -77,7 +78,7 @@ namespace Halcyon.FirstWeather
             if (screenFade != null) { fade = quietMotion ? 1 : Mathf.MoveTowards(fade, 1, Time.unscaledDeltaTime * 4); screenFade.alpha = fade; }
             float level = muted ? 0 : modal ? .025f : .055f;
             music.volume = Mathf.Lerp(music.volume, level, Time.unscaledDeltaTime * 3);
-            float water = state.story == "greenhouse" || state.story == "aftergarden" || state.view == "garden" ? .08f : .03f;
+            float water = academyExterior ? .055f : state.story == "greenhouse" || state.story == "aftergarden" || state.view == "garden" ? .08f : .03f;
             ambience.volume = Mathf.Lerp(ambience.volume, muted ? 0 : modal ? .01f : water, Time.unscaledDeltaTime * 2);
             var kb = Keyboard.current;
             if (kb == null) return;
@@ -134,12 +135,14 @@ namespace Halcyon.FirstWeather
             #if UNITY_EDITOR
             interfacePreview = false;
             #endif
+            academyExterior = false;
             title = false; modal = false; state = new SliceState();
             state.Note("Arrived in Halcyon. Begin at Molly's residence; morning routines open the city.");
             Save(); Render();
         }
         void ResumeGame()
         {
+            academyExterior = false;
             #if UNITY_EDITOR
             interfacePreview = false;
             #endif
@@ -147,6 +150,7 @@ namespace Halcyon.FirstWeather
         }
         public void StartStory(string key)
         {
+            academyExterior = false;
             state.view = "story"; state.story = key; state.page = 0; Save(); Render();
         }
         public void Advance(string effect)
@@ -239,6 +243,7 @@ namespace Halcyon.FirstWeather
             if (state.view == "story") DrawStory();
             else if (state.view == "garden") DrawGarden();
             else if (state.view == "ending") DrawEnding();
+            else if (academyExterior) DrawLivingAcademy();
             else DrawMap();
             if (modal) OpenModal(modalKind);
         }

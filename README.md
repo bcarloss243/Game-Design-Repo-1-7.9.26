@@ -2,7 +2,17 @@
 
 A Unity game prototype by **Bergen Carloss**.
 
-## Latest update: map interface v0.2 — September 8, 2026
+## Latest update: living academy forecourt — September 9, 2026
+
+Select **The Academy** on the district map to visit its new forecourt. The building, distant setting and near water are separate layers, with eight students following routes, fluttering banners, changing window and lantern light, airborne leaves and a working tower clock. Use **Entrance**, **Clocktower**, **Overview**, or **+ / −** to explore. Scroll pans the view; Command/Ctrl + scroll zooms around the pointer. The dial and controls stay fixed on screen.
+
+The forecourt is open during every existing map phase. **Enter your classroom** appears when the story is ready for class. Looking around spends no activity slots or Pressure. Story writing and progression remain unchanged; continuing a save returns to the district map.
+
+This is a layered 2.5D exterior study with live scene objects. The academy illustration itself is not a freely rotatable 3D model. The district overview and classroom interior retain their earlier presentation. No new downloadable build was made for this update.
+
+Unity verification passed **555 academy checks**, including 406 text measurements, plus the existing **3,295 story/rules assertions**. See [the academy update and verification](Assets/HalcyonSlice/Documentation/AcademyUpdate.md), including the remaining human input checks.
+
+## Map interface v0.2 — September 8, 2026
 
 The map now uses full-width artwork, Cormorant Garamond headings, brass details, smaller location labels, a foldable timetable and an illustrated Pressure barometer with a live needle. The instrument also appears beside dialogue. Existing story text, progression and saves remain compatible.
 
@@ -12,7 +22,7 @@ The map layout check found **zero issues across 1,596 text measurements**. The M
 
 At Bergen's direction, continue the next phase in **Unity and GitHub**. Do not rebuild or package the downloadable game until that phase is finished, unless Bergen explicitly requests a build. The dial's visual direction is approved. Bergen intends to write the dialogue; the existing draft remains provisional.
 
-The recommended next milestone is an explorable map: smooth trackpad panning and controlled zoom, location markers anchored to the artwork, clear unlock states and a reliable return to the district overview. Layered depth and animated water, boats and lighting follow once movement is comfortable. These features are planned and are not included in v0.2.
+The current focus is the main academy exterior. Review its controls, atmosphere and visual direction before extending the approach to the district map or other interiors. City-wide navigation, district unlocking and broader environmental animation remain follow-up work.
 
 ## Playable foundation: First Weather v0.1
 
@@ -55,6 +65,7 @@ To build locally, install Unity's Mac Build Support and choose **Halcyon → 4 B
 - [September 8 update and remaining work](CHANGELOG.md)
 - [Map interface changes and artwork sources](Assets/HalcyonSlice/Documentation/InterfaceUpdate.md)
 - [Map interface verification](Assets/HalcyonSlice/Documentation/InterfaceQA.md)
+- [Living academy update, controls and verification](Assets/HalcyonSlice/Documentation/AcademyUpdate.md)
 - [Full play instructions and prototype scope](Assets/HalcyonSlice/Documentation/README.md)
 - [Test results and limitations](Assets/HalcyonSlice/Documentation/QA.md)
 - [Human playtest worksheet](Assets/HalcyonSlice/Documentation/CapstonePlaytests.md)

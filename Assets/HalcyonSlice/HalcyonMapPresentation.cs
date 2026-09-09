@@ -140,8 +140,8 @@ namespace Halcyon.FirstWeather
                     if (morning) StartStory(state.day == 1 ? "morning1" : "morning2");
                     else if (state.slots == 0) StartStory("night"); else OpenModal("residence");
                 });
-            MapPlace("The Academy", state.phase == "class1" || state.phase == "class2" ? "CLASS IS BEGINNING" : morning ? "MORNING ROUTINE FIRST" : "CLASS COMPLETE", 804, 220,
-                state.phase == "class1" || state.phase == "class2", true, () => StartStory(state.phase));
+            MapPlace("The Academy", state.phase == "class1" || state.phase == "class2" ? "CLASS IS BEGINNING" : "EXPLORE THE GROUNDS", 804, 220,
+                true, true, OpenAcademyExterior);
             MapPlace("Reading Room", state.studied ? "PREPARED" : afternoon ? "+12 PRESSURE  ·  1 SLOT" : "AFTER CLASS", 687, 467,
                 state.CanActivity("study"), true, () => DoActivity("study"));
             MapPlace("Canal Steps", state.socialized ? "VISITED" : afternoon ? "−9 PRESSURE  ·  1 SLOT" : "AFTER CLASS", 1005, 615,

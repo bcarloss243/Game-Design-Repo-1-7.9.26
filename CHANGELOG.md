@@ -1,5 +1,16 @@
 # Change log
 
+## Living academy forecourt — September 9, 2026
+
+The Academy map marker now opens a visitable exterior instead of immediately starting class. Players can look around during any existing map phase; the classroom action is available only at the existing class milestones. Returning to the district preserves story state, Pressure and remaining activities.
+
+- **Scene:** separate illustrated architecture, distant setting and near water; eight animated student routes; wind-driven banners; changing window and lantern light; moving reflections and leaves; live clock hands. Pause and reduced motion stop ambient movement.
+- **Navigation:** bounded panning and zoom, Entrance/Clocktower/Overview views, fixed interface controls and the approved barometer. Scroll pans; Command/Ctrl + scroll zooms. Mouse-drag and keyboard handlers are included; physical trackpad comfort and drag behavior still need Bergen's input review.
+- **Assets:** two reference-guided illustrations with recorded prompts. The RGB building export uses precomputed sprite geometry to exclude its painted background. The unchanged bitmap and reproducible geometry utility accompany the source.
+- **Verification:** 555 academy checks passed, including 406 text measurements; the original story verifier passed 3,295 assertions. The corrected outline, entrance/tower close-ups, scroll panning, moving students/clock and classroom entry were inspected in Unity. Details and limits are in [AcademyUpdate.md](Assets/HalcyonSlice/Documentation/AcademyUpdate.md).
+
+This is a 2.5D exterior study. It does not add free 3D orbiting, new dialogue, animated classroom interiors or city-wide navigation. Work remains in Unity and GitHub; no new compiled app or downloadable archive was produced.
+
 ## Map interface v0.2 — September 8, 2026
 
 The original permanent map sidebar obscured the city and the UI did not carry the illustrated art direction. This pass gives the city image the full screen, with serif headings, fine brass borders, smaller location backplates and a foldable timetable. Available and unavailable locations use filled/hollow diamond pins plus written status.
