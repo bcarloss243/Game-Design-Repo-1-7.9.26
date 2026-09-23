@@ -1,57 +1,27 @@
-# Capstone playtest and submission record
+# Playtest evidence and next sessions
 
-This document is a template. No human playtest results have been invented or entered.
+## Feedback actually supplied
 
-## Run three actual playtests
+Bergen supplied these approximate retrospective comments on September 23, 2026:
 
-At least one must use the digital prototype. Give each participant the build and no explanation beyond “Please play until you reach an ending.” Observe rather than coach. Record start/end time excluding interruptions and note the first place they hesitate.
+| User-reported comment | Version / participant / date | Revision response |
+|---|---|---|
+| “The world doesn't feel immersive enough but it's cool.” | Not supplied | Painted scene consistency; explorable district; academy students, clock, water, lighting; sensory Ward details. |
+| “Like the art style of the new title.” | Not supplied | Use the September title as the palette/brushwork direction for scenes and UI. |
+| “I don't understand why I would keep playing, not compelling enough.” | Not supplied | Pressure-dependent consequences, evening contact, family restrictions, Lola’s reciprocal needs, scarce-water commitment, tomorrow’s invitation. |
 
-Ask afterward:
+These are three feedback themes, **not evidence of three identified playtest sessions**. Do not submit them as three completed tests. No participants, completion times, or observed behaviors have been invented.
 
-1. What did you think you were trying to do?
-2. How did you decide between preparation, rest and company?
-3. Did you notice your first-day choices in the second day?
-4. What did you think the Pressure meter meant?
-5. Could you complete or leave the garden without help?
-6. How did Molly and Lola's meeting feel? Did you want another scene?
-7. Was any text difficult to read or any control hard to use?
+Bergen’s direct iteration notes additionally rejected the father portrait and room as insufficiently painted, the academy’s mismatched style and visible sky, and the miniature scale and geometric walkers. Those were art-direction reviews; the revisions are recorded in IterationJournal.md.
 
-| Session | Date / participant alias | Digital or earlier format | Device / build | Minutes to ending | Ending | Main observation | Change made |
-| --- | --- | --- | --- | --- | --- | --- | --- |
-| 1 | To record | To record | To record | To record | To record | To record | To record |
-| 2 | To record | To record | To record | To record | To record | To record | To record |
-| 3 | To record | To record | To record | To record | To record | To record | To record |
+## Three sessions still to document
 
-Keep participants' identities private unless they agree to be credited. Use aliases in the submitted journal.
+Use the final approved Unity revision and record its commit/version. Have each participant play without coaching. Ask them to think aloud if comfortable; do not supply an interpretation of the barometer or characters.
 
-## Journal entry template
+For each of sessions 1, 2 and 3, record: participant alias/consent, date, commit/version, device, start/end time, selected routines and activities, completion result, confusing moments with exact screen/line, controls or text issues, verbatim comments, and your observed behavior. Keep private identifying information out of the repository.
 
-Date and build:
+Ask afterward: What did you want to do next? When did the gauge make sense or become confusing? How did yesterday change today? What did taking or leaving Vapeur seem to do? What did Lola need? What did you decide to leave short in the garden? Where did the world feel inhabited or static? Did the UI belong to the illustrations?
 
-Question being tested:
+Use one session to include larger text and one to include reduced motion/keyboard controls. Invite feedback on comfort without asking for anyone’s medical history.
 
-What the participant actually did or said:
-
-Where they needed help or stopped:
-
-What changed after this test, and why:
-
-Evidence from a later test that the change helped:
-
-## One-page reflection outline
-
-Write this from your actual experience after testing: the intended player experience; one successful design choice with evidence; one failed assumption; the specific change you made; the most useful feedback; and the next priority. Distinguish your own creative decisions from AI-assisted implementation and draft writing as required by your course policy.
-
-## Submission checklist
-
-- [ ] At least five minutes of playability confirmed with real players.
-- [ ] Clear end result, new game, save/continue, pause and safe quit verified on the submitted build.
-- [ ] Title, creator name, credits and asset provenance reviewed.
-- [ ] Three real playtests documented, including at least one digital test.
-- [ ] Journal and one-page reflection completed.
-- [ ] Pitch video with voiceover and slides recorded, no longer than five minutes.
-- [ ] Final build ZIP uploaded to the chosen submission host, or a supported web build published.
-- [ ] Download/link tested from a separate account or signed-out session.
-- [ ] Submission form includes the actual accessible URL and any required passwords.
-
-Only Mac build support was found installed during development. A Windows or WebGL build needs the corresponding Unity platform module and its own playthrough. No online upload is performed by the game itself.
+For each session add a short finding → change → retest result table. Record disagreement between participants rather than turning it into a false consensus. The existing automated verification reports are engineering evidence only.

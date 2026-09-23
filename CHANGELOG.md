@@ -1,5 +1,15 @@
 # Change log
 
+## First Weather v0.3 — September 23, 2026
+
+The previous illustrations and default-looking interface did not carry the new title’s painted style. The academy also read as a miniature against its surroundings, and geometric walkers undermined the world’s scale. This revision repaints the scenes, corrects the complete courtyard perspective, replaces walkers with painted poses sized to the doors, and applies indigo/gold materials and new typography across the interface. Outside weather is concealed in the playable room/courtyard views; the district now depicts the same compact academy.
+
+The comprehensive critique is mapped in [REVISION-CHECKLIST.md](Assets/HalcyonSlice/Documentation/REVISION-CHECKLIST.md). Pressure, routines, yesterday’s activities, class consequences, an evening, typed journal, Rootwork, mentor priorities and the final Lola dispatch are connected into the two-day loop. The original barometer feel script is wired into the live portrait dial. Prose moves into editable Ink and remains Bergen’s working draft to replace.
+
+Validation: 108 simulated routes / 1,534 assertions; 4,283 runtime screen assertions; 555 academy checks; 1,764 map text measurements; complete button-driven runs to both completion states. The latter include the recovery/unfinished-garden route. These are engineering checks, not human playtests. See the [current QA record](Assets/HalcyonSlice/Documentation/V03-QA.md).
+
+Added writing instructions, an honest record of supplied feedback themes, iteration journal, reflection draft, pitch script, art prompts/provenance and updated font/dependency notices. Three documented participant sessions and a recorded pitch are still required. No executable or ZIP was rebuilt. Existing unrelated Unity settings/recovery files are outside this update.
+
 ## Living academy forecourt — September 9, 2026
 
 The Academy map marker now opens a visitable exterior instead of immediately starting class. Players can look around during any existing map phase; the classroom action is available only at the existing class milestones. Returning to the district preserves story state, Pressure and remaining activities.

@@ -1,77 +1,44 @@
-# Halcyon Academy
+# Halcyon Academy · First Weather
 
-A Unity game prototype by **Bergen Carloss**.
+A Unity narrative prototype by **Bergen Carloss**.
 
-## Latest update: living academy forecourt — September 9, 2026
+## Current revision: v0.3 — September 23, 2026
 
-Select **The Academy** on the district map to visit its new forecourt. The building, distant setting and near water are separate layers, with eight students following routes, fluttering banners, changing window and lantern light, airborne leaves and a working tower clock. Use **Entrance**, **Clocktower**, **Overview**, or **+ / −** to explore. Scroll pans the view; Command/Ctrl + scroll zooms around the pointer. The dial and controls stay fixed on screen.
+This revision updates **Unity and GitHub only**. The earlier downloadable game has not been rebuilt; packaging waits for Bergen’s approval.
 
-The forecourt is open during every existing map phase. **Enter your classroom** appears when the story is ready for class. Looking around spends no activity slots or Pressure. Story writing and progression remain unchanged; continuing a save returns to the district map.
+- **Painted world and interface:** September title art direction, Cinzel Decorative headings, Cormorant body text, indigo/gold panels, new character portraits and environments. The academy is a compact two-storey building in a coherent enclosed courtyard. Painted walking figures replace geometric pedestrians; clock, light, foreground and water remain live layers. The district pans/zooms and shows the matching academy. Room and courtyard views conceal outside weather.
+- **Choices with consequences:** three morning routines, pressure-sensitive prose and sound, helpful Vapeur with a floor and cumulative stability, rebound, persisted morning variation, academic preparation and threshold-based recovery costs. Lola’s presence changes the instrument without a relationship score.
+- **Two-day loop:** evening call/message/sleep options, first-person notes and a typed journal, family dispatches, Rootwork-led scarce-water choices with different mentor priorities, and Lola’s final message instead of a scorecard.
+- **Writer access:** dialogue is editable in [FirstWeather.ink](Assets/HalcyonSlice/Narrative/FirstWeather.ink), with a [writing guide](Assets/HalcyonSlice/Documentation/WRITING-GUIDE.md). This remains a working draft for Bergen to author.
 
-This is a layered 2.5D exterior study with live scene objects. The academy illustration itself is not a freely rotatable 3D model. The district overview and classroom interior retain their earlier presentation. No new downloadable build was made for this update.
-
-Unity verification passed **555 academy checks**, including 406 text measurements, plus the existing **3,295 story/rules assertions**. See [the academy update and verification](Assets/HalcyonSlice/Documentation/AcademyUpdate.md), including the remaining human input checks.
-
-## Map interface v0.2 — September 8, 2026
-
-The map now uses full-width artwork, Cormorant Garamond headings, brass details, smaller location labels, a foldable timetable and an illustrated Pressure barometer with a live needle. The instrument also appears beside dialogue. Existing story text, progression and saves remain compatible.
-
-The map layout check found **zero issues across 1,596 text measurements**. The Mac app resumed an existing afternoon save at Pressure 57 with one slot remaining. See the [interface update](Assets/HalcyonSlice/Documentation/InterfaceUpdate.md) and [v0.2 verification](Assets/HalcyonSlice/Documentation/InterfaceQA.md).
-
-### Current development workflow
-
-At Bergen's direction, continue the next phase in **Unity and GitHub**. Do not rebuild or package the downloadable game until that phase is finished, unless Bergen explicitly requests a build. The dial's visual direction is approved. Bergen intends to write the dialogue; the existing draft remains provisional.
-
-The current focus is the main academy exterior. Review its controls, atmosphere and visual direction before extending the approach to the district map or other interiors. City-wide navigation, district unlocking and broader environmental animation remain follow-up work.
-
-## Playable foundation: First Weather v0.1
-
-**First Weather** adds a playable, illustrated narrative slice covering Molly's first two days at Halcyon Academy. Choose a mentor, balance study, rest and company, carry those decisions into the next morning, and meet Lola in the greenhouse. A two-stage garden puzzle leads to one of two explicit story endings.
-
-The study/rest route contains **40 narrative pages and 2,241 words**: an estimated **9–11 minutes of reading, plus choices and the puzzle**. This is a content estimate; actual completion time still needs human playtesting.
-
-![The greenhouse in First Weather](Assets/HalcyonSlice/Resources/HalcyonArt/greenhouse.png)
+![Revised academy courtyard](Assets/HalcyonSlice/Resources/HalcyonAcademy/AcademyForecourt.png)
 
 ## Open and play
 
-1. Clone this repository with **Git LFS** installed, then run `git lfs pull` to retrieve the artwork and the project's other large assets.
-2. Open the repository folder in **Unity 6000.3.14f1** through Unity Hub. Let Unity finish importing and compiling.
-3. Choose **Halcyon → 1 Open First Weather** from the Unity menu.
-4. Press **Play**. Choose **Begin a new story**, then start at the residence on the city map.
+1. Clone with Git LFS installed, then retrieve the large assets with `git lfs pull`.
+2. Open the project with **Unity 6000.3.14f1**.
+3. Choose **Halcyon → 1 Open First Weather**, then press Play.
+4. Begin or continue a story. Start at the residence, attend class, choose afternoon activities, return home, then play the second day through Lola’s message.
 
-The scene is `Assets/HalcyonSlice/Scenes/FirstWeather.unity`. The original `Assets/Scenes/SampleScene.unity` and earlier prototype scripts are preserved.
+Click or use Tab/Shift+Tab and Enter. Space advances pages without choices; Esc pauses; J opens the journal; M toggles audio. Drag/scroll explores the map and academy; zoom/recenter buttons provide alternatives. Settings include larger story text and reduced motion. One local save; a new story replaces it. Developer previews isolate the save: stop and restart Play mode for normal play.
 
-Click locations and choices. **Space** advances pages without choices. **Tab / Shift+Tab** select buttons; **Enter** activates them. **Escape** pauses, **J** opens the journal, and **M** mutes audio. Settings include larger story text and reduced motion. Continue resumes the prototype's single local save; beginning a new story replaces it.
+The original SampleScene is preserved. This is layered 2D artwork with animated details, not a freely rotatable 3D city. The two student designs and their simple pose cycles are prototype crowd assets.
 
-## What this update adds
+## Verification and review
 
-- A city navigation screen and two-day story with morning, class, afternoon and sleep progression.
-- Three room keepsakes, two mentor tracks, and two afternoon activity slots shared between study, rest and company.
-- Pressure feedback and earlier choices that change the second-day classroom scene.
-- A conversation with Lola, a six-measure water allocation puzzle with changing light, optional hints, and **Garden Restored** or **Work in Progress** endings.
-- Title, pause, save/continue, journal, help, settings, credits and dependency license screens.
-- Four new reference-guided environment illustrations, the supplied cover art, and original synthesized music, ambience and interface sounds.
+The revised story/rules check passes **1,534 assertions across 108 simulated routes**. Runtime checks pass **4,283 screen assertions**, **555 academy checks**, and **1,764 map text measurements**. Complete button-driven editor runs reach both **Garden Restored** and **Work in Progress**, including the high-pressure recovery route. The study/rest route contains **1,610 narrative words**, about 6.4–8.1 minutes at 200–250 words/minute before interactions; this is an estimate, not measured human playtime.
 
-This is an **illustrated narrative prototype with static environment art**, not a freely walkable 3D city. Room keepsakes affect writing and journal state. The dialogue, added mentor/classmate names and garden project are provisional content for review.
+See [current QA and limits](Assets/HalcyonSlice/Documentation/V03-QA.md) and the [critique checklist](Assets/HalcyonSlice/Documentation/REVISION-CHECKLIST.md). The full quarter, broader Ward travel and later revelations are outside this slice. Three documented human playtests, Bergen’s dialogue/art review, the pitch recording and eventual package/upload remain separate completion gates.
 
-## Verification and build
+## Documents and credits
 
-The story/rules verifier passed **3,295 assertions**. A complete Unity editor route reached **Garden Restored**; a native Mac route from an existing save reached **Work in Progress**. Save/continue, puzzle recovery, keyboard navigation, larger text, credits and license navigation were checked. See the [verification record](Assets/HalcyonSlice/Documentation/QA.md) for the precise scope and limitations.
+- [Play instructions and known limits](Assets/HalcyonSlice/Documentation/README.md)
+- [Feedback evidence and three-session worksheet](Assets/HalcyonSlice/Documentation/CapstonePlaytests.md)
+- [Iteration journal](Assets/HalcyonSlice/Documentation/IterationJournal.md)
+- [Reflection draft](Assets/HalcyonSlice/Documentation/Reflection-Draft.md)
+- [Five-minute pitch script](Assets/HalcyonSlice/Documentation/PitchVideo-Script-Draft.md)
+- [Art provenance](Assets/HalcyonSlice/Documentation/V03-ArtProvenance.md)
+- [Dependency notices](Assets/HalcyonSlice/Documentation/ThirdPartyNotices.txt)
+- [Version history](CHANGELOG.md)
 
-To build locally, install Unity's Mac Build Support and choose **Halcyon → 4 Build Mac Prototype** while Play Mode is stopped. Output goes to `Builds/FirstWeather-Mac`. The tested build contains Apple Silicon and Intel executables and requires macOS 12 or newer; execution was tested on Apple Silicon only. The locally packaged app is ad hoc signed, not notarized. Compiled apps and ZIP downloads are not included in this source commit.
-
-## Documentation and credits
-
-- [September 8 update and remaining work](CHANGELOG.md)
-- [Map interface changes and artwork sources](Assets/HalcyonSlice/Documentation/InterfaceUpdate.md)
-- [Map interface verification](Assets/HalcyonSlice/Documentation/InterfaceQA.md)
-- [Living academy update, controls and verification](Assets/HalcyonSlice/Documentation/AcademyUpdate.md)
-- [Full play instructions and prototype scope](Assets/HalcyonSlice/Documentation/README.md)
-- [Test results and limitations](Assets/HalcyonSlice/Documentation/QA.md)
-- [Human playtest worksheet](Assets/HalcyonSlice/Documentation/CapstonePlaytests.md)
-- [Art provenance](Assets/HalcyonSlice/Documentation/ArtProvenance.md)
-- [Third-party notices](Assets/HalcyonSlice/Documentation/ThirdPartyNotices.txt)
-
-World, characters and creative direction: Bergen Carloss. Programming, draft writing and synthesized audio were created with OpenAI Codex under Bergen's direction. Four environment illustrations were generated with OpenAI image generation from supplied references. The supplied cover's original creator and distribution rights still need to be recorded; no new ownership claim is made over it.
-
-The capstone still needs real participant playtests and timing evidence, the journal/reflection, the pitch recording and the final submission upload. Automated checks do not replace those requirements.
+Bergen Carloss: concept, world, characters and creative direction. OpenAI Codex assisted with programming, draft writing and original synthesized audio. OpenAI image generation produced reference-guided prototype illustrations. Cinzel Decorative and Cormorant are bundled under SIL OFL 1.1. Ink, DOTween, Unity components and the preexisting FMOD integration retain their notices; FMOD is by Firelight Technologies Pty Ltd. The user-supplied title reference’s original authorship/publication provenance must be confirmed before distribution.

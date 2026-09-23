@@ -26,7 +26,7 @@ namespace Halcyon.FirstWeather.Editor
             if (game == null) return;
             var issues = new List<string>(); int checks = 0, measured = 0;
             Action<bool, string> check = (ok, why) => { checks++; if (!ok) issues.Add(why); };
-            check(AcademyFacadeGraphic.MeshIsComplete, "Architecture sprite geometry is incomplete.");
+            check(Resources.Load<Texture2D>("HalcyonArtV3/students") != null, "Painted student poses missing.");
             foreach (string name in new[] { "AcademyBuilding", "AcademyForecourt" })
                 check(Resources.Load<Texture2D>("HalcyonAcademy/" + name) != null, "Missing academy art: " + name);
             var motionHost = new GameObject("Isolated academy motion check", typeof(RectTransform));
@@ -59,8 +59,8 @@ namespace Halcyon.FirstWeather.Editor
                 foreach (var p in new[] { new Vector2(-10000, -10000), new Vector2(10000, 10000), new Vector2(800, 450) })
                 {
                     Vector2 c = AcademyCourtyard.ClampCenter(p, zoom);
-                    check(c.x - 800 / zoom >= -190.01f && c.x + 800 / zoom <= 1790.01f, "Horizontal camera boundary failed.");
-                    check(c.y - 450 / zoom >= -200.01f && c.y + 450 / zoom <= 920.01f, "Vertical camera boundary failed.");
+                    check(c.x - 800 / zoom >= -.01f && c.x + 800 / zoom <= 1600.01f, "Horizontal camera boundary failed.");
+                    check(c.y - 450 / zoom >= -.01f && c.y + 450 / zoom <= 900.01f, "Vertical camera boundary failed.");
                 }
             }
             foreach (var p in new[] { new Vector2(200, 150), new Vector2(800, 450), new Vector2(1400, 800) })
@@ -103,7 +103,7 @@ namespace Halcyon.FirstWeather.Editor
             check(saveBefore == PlayerPrefs.GetString("Halcyon.FirstWeather.Save.v1", ""), "Editor preview overwrote the story save.");
             game.PreviewMapInterface("class1", PlayerPrefs.GetInt("Halcyon.LargeText", 0) == 1); game.OpenAcademyExterior();
             string report = "LIVING ACADEMY: " + issues.Count + " issues; " + checks + " checks; " + measured + " text measurements.\n" +
-                "Checked camera bounds, cursor-anchored zoom, architecture mesh, art loading, seven map phases, two text settings, class entry/gating, state preservation, preview save isolation, student motion, pause, reduced motion and frame-time safety.\n" +
+                "Checked camera bounds, cursor-anchored zoom, painted courtyard and student poses, art loading, seven map phases, two text settings, class entry/gating, state preservation, preview save isolation, student motion, pause, reduced motion and frame-time safety.\n" +
                 "Visual rendering and trackpad comfort need separate checks.\n" + string.Join("\n", issues);
             File.WriteAllText("Assets/HalcyonSlice/Documentation/AcademyVerification.txt", report);
             if (issues.Count == 0) Debug.Log(report); else Debug.LogError(report);

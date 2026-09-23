@@ -40,16 +40,16 @@ namespace Halcyon.FirstWeather
         float displayedPressure, fade = 1, lastAction = -10;
         CanvasGroup screenFade;
         ScrollRect modalScroll;
-        Color ink = new Color32(24, 36, 41, 255), cream = new Color32(242, 229, 205, 255);
-        Color brass = new Color32(204, 170, 111, 255), mint = new Color32(173, 211, 193, 255);
-        Color mutedInk = new Color32(80, 93, 94, 255);
+        Color ink = new Color32(39, 32, 38, 255), cream = new Color32(247, 234, 211, 255);
+        Color brass = new Color32(197, 162, 115, 255), mint = new Color32(219, 196, 158, 255);
+        Color mutedInk = new Color32(115, 93, 86, 255);
 
         void Awake()
         {
             Application.targetFrameRate = 60;
             font = TMP_Settings.defaultFontAsset;
             foreach (string key in new[] { "map", "dorm", "academy", "greenhouse", "cover" })
-                art[key] = Resources.Load<Texture2D>("HalcyonArt/" + key);
+                art[key] = Resources.Load<Texture2D>("HalcyonArtV3/" + key);
             largeText = PlayerPrefs.GetInt("Halcyon.LargeText", 0) == 1;
             quietMotion = PlayerPrefs.GetInt("Halcyon.ReducedMotion", 0) == 1;
             muted = PlayerPrefs.GetInt("Halcyon.Muted", 0) == 1;
@@ -63,6 +63,7 @@ namespace Halcyon.FirstWeather
                 var ev = new GameObject("First Weather Input", typeof(EventSystem), typeof(InputSystemUIInputModule));
                 ev.GetComponent<InputSystemUIInputModule>().AssignDefaultActions();
             }
+            PreparePresentation();
             SetupAudio(); displayedPressure = state.pressure;
             Render();
         }
@@ -72,15 +73,25 @@ namespace Halcyon.FirstWeather
             canvas.scaleFactor = Mathf.Min(Screen.width / 1600f, Screen.height / 900f);
             if (!title && !modal && !state.finished) state.playSeconds += Time.unscaledDeltaTime;
             displayedPressure = quietMotion ? state.pressure : Mathf.Lerp(displayedPressure, state.pressure, Time.unscaledDeltaTime * 3);
-            if (needle != null)
-                needle.localEulerAngles = new Vector3(0, 0, Mathf.Lerp(120, -120, displayedPressure / 100f) + (quietMotion || modal ? 0 : Mathf.Sin(Time.unscaledTime * 2.5f) * displayedPressure / 130f));
+            if (gaugeFeel != null)
+            {
+                gaugeFeel.reducedMotion = quietMotion; gaugeFeel.paused = modal;
+                gaugeFeel.trembleMultiplier = state.ShelterFactor * (state.medicated ? .32f : 1);
+                gaugeFeel.SetPressure(state.pressure);
+            }
+            if (soundscape != null) soundscape.Mix(state, muted, modal || title);
             if (gaugeValue != null) gaugeValue.text = Mathf.RoundToInt(displayedPressure) + " / 100";
             if (screenFade != null) { fade = quietMotion ? 1 : Mathf.MoveTowards(fade, 1, Time.unscaledDeltaTime * 4); screenFade.alpha = fade; }
-            float level = muted ? 0 : modal ? .025f : .055f;
+            float level = muted ? 0 : modal ? .006f : state.story == "callhome" ? 0 : state.WithLola ? .022f : .035f;
             music.volume = Mathf.Lerp(music.volume, level, Time.unscaledDeltaTime * 3);
             float water = academyExterior ? .055f : state.story == "greenhouse" || state.story == "aftergarden" || state.view == "garden" ? .08f : .03f;
             ambience.volume = Mathf.Lerp(ambience.volume, muted ? 0 : modal ? .01f : water, Time.unscaledDeltaTime * 2);
             var kb = Keyboard.current;
+            if (journalInput != null && journalInput.isFocused)
+            {
+                if (kb != null && kb.escapeKey.wasPressedThisFrame) { journalInput.DeactivateInputField(); Save(); CloseModal(); }
+                return;
+            }
             if (kb == null) return;
             if (kb.escapeKey.wasPressedThisFrame) { if (modal) CloseModal(); else OpenModal(title ? "help" : "pause"); }
             if (kb.mKey.wasPressedThisFrame) { muted = !muted; SaveSettings(); if (modalKind == "settings") OpenModal("settings"); }
@@ -125,7 +136,9 @@ namespace Halcyon.FirstWeather
             try
             {
                 var loaded = JsonUtility.FromJson<SliceState>(PlayerPrefs.GetString(SaveKey, ""));
-                if (loaded == null || !loaded.Validate()) return false;
+                if (loaded == null) return false;
+                if (loaded.version == 1) { PlayerPrefs.SetString("Halcyon.FirstWeather.Backup.v1", PlayerPrefs.GetString(SaveKey)); loaded.Migrate(); }
+                if (!loaded.Validate()) return false;
                 state = loaded; return true;
             }
             catch { return false; }
@@ -136,8 +149,8 @@ namespace Halcyon.FirstWeather
             interfacePreview = false;
             #endif
             academyExterior = false;
-            title = false; modal = false; state = new SliceState();
-            state.Note("Arrived in Halcyon. Begin at Molly's residence; morning routines open the city.");
+            title = false; modal = false; state = new SliceState { seed = Environment.TickCount & int.MaxValue };
+            state.Note("Quietest wing. Dad checked.");
             Save(); Render();
         }
         void ResumeGame()
@@ -157,19 +170,19 @@ namespace Halcyon.FirstWeather
         {
             if (Time.unscaledTime - lastAction < .15f) return;
             lastAction = Time.unscaledTime;
-            if (effect.StartsWith("decor:")) { state.decor = effect.Substring(6); state.Pressure(-3); state.Note("Made the dorm your own with a " + state.decor + ". Pressure eased by 3."); }
-            if (effect.StartsWith("mentor:")) { state.mentor = effect.Substring(7); state.Note("Chose " + state.mentor + " as the first mentor track."); }
-            if (effect == "routine") { state.routineDays++; state.Pressure(-6); state.Note("Day " + state.day + ": the familiar routine eased Pressure by 6. No story paths were closed."); }
-            if (effect == "panic" || effect == "support")
-            {
-                state.Pressure(state.rested ? 24 : 32);
-                if (effect == "support") state.Pressure(-4);
-                state.Note("Class was interrupted by a panic attack. Asking for space or support opened a route to the greenhouse.");
-            }
-            if (effect == "share") { state.shared = true; state.Pressure(-5); state.Note("Told Lola that class was difficult. She offered company without requiring an explanation."); }
-            if (effect == "tea" || effect == "return") state.Note(effect == "tea" ? "Made a plan to start with tea tomorrow." : "Accepted Lola's invitation to return tomorrow.");
+            state.Apply(effect);
             state.page++;
             if (state.page >= SliceStory.Get(state.story, state).Count) EndStory(); else { Save(); Render(); }
+        }
+        void EnterStoryPage()
+        {
+            var pages = SliceStory.Get(state.story, state);
+            state.page = Mathf.Clamp(state.page, 0, pages.Count - 1);
+            string ev = pages[state.page].onEnter;
+            bool fresh = ev != "" && !state.events.Contains(ev);
+            state.EnterEvent(ev);
+            if (fresh && (ev == "assessment" || ev == "call-end" || ev == "harvest-lights")) soundscape?.Harvest();
+            if (fresh) Save();
         }
         void EndStory()
         {
@@ -177,19 +190,22 @@ namespace Halcyon.FirstWeather
             state.view = "map"; state.story = ""; state.page = 0;
             if (key == "morning1") state.phase = "class1";
             if (key == "class1") state.phase = "afternoon";
+            if (key == "callhome" || key == "messagejules") { state.phase = "evening"; state.view = "evening"; }
             if (key == "night") state.Sleep();
             if (key == "morning2") state.phase = "class2";
-            if (key == "class2") { state.phase = "corridor"; state.Pressure(-7); }
-            if (key == "greenhouse") { state.view = "garden"; state.Pressure(-12); }
-            if (key == "aftergarden") { state.phase = "homecoming"; state.Note("Discovered the greenhouse: a place to return to. The two-day story is complete."); }
+            if (key == "class2") state.phase = "corridor";
+            if (key == "greenhouse") state.view = "garden";
+            if (key == "aftergarden") { state.phase = "homecoming"; state.Note("Lola showed me the side landing."); }
             Save(); Render();
         }
-        void DoActivity(string key) { if (state.Activity(key)) StartStory(key); }
-        void FinishGarden(bool success)
+        void BeginEvening()
         {
-            state.solved = success; state.Pressure(success ? -8 : -4);
-            state.Note(success ? "Balanced the floating garden through both light conditions." : "Left the prototype safe with a note for another trial. The invitation remains open.");
-            StartStory("aftergarden");
+            state.phase = "evening"; state.slots = 0; state.view = "evening"; Save(); Render();
+        }
+        void DoActivity(string key) { if (state.Activity(key)) StartStory(key); }
+        void FinishGarden(bool committed)
+        {
+            state.CompleteGarden(committed); StartStory("aftergarden");
         }
 
         RectTransform Rect(string name, Transform parent, float x, float y, float w, float h)
@@ -205,22 +221,15 @@ namespace Halcyon.FirstWeather
         TMP_Text Text(Transform p, string value, float x, float y, float w, float h, float size, Color c, bool bold = false, TextAlignmentOptions align = TextAlignmentOptions.TopLeft)
         {
             var t = Rect("Text: " + (value.Length > 35 ? value.Substring(0, 35) : value), p, x, y, w, h).gameObject.AddComponent<TextMeshProUGUI>();
-            t.font = font; t.text = value; t.fontSize = size; t.color = c; t.fontStyle = bold ? FontStyles.Bold : FontStyles.Normal;
+            t.font = displayFont != null ? displayFont : font; t.text = value; t.fontSize = size; t.color = c; t.fontStyle = bold ? FontStyles.Bold : FontStyles.Normal;
             t.alignment = align; t.textWrappingMode = TextWrappingModes.Normal; t.overflowMode = TextOverflowModes.Overflow;
-            t.raycastTarget = false; t.lineSpacing = 5; return t;
+            t.raycastTarget = false; t.lineSpacing = 3; return t;
         }
         Button Button(Transform p, string label, float x, float y, float w, float h, Action action, bool enabled = true, bool primary = false, float size = 22)
         {
-            var r = Rect(label, p, x, y, w, h); var im = r.gameObject.AddComponent<Image>();
-            im.color = primary ? mint : new Color32(45, 61, 64, 255);
-            var b = r.gameObject.AddComponent<Button>(); b.targetGraphic = im; b.interactable = enabled;
-            var colors = b.colors; colors.normalColor = Color.white; colors.highlightedColor = new Color(1.2f, 1.2f, 1.15f);
-            colors.selectedColor = new Color(1.28f, 1.24f, 1.1f); colors.pressedColor = new Color(.8f, .85f, .8f); colors.disabledColor = new Color(.45f, .48f, .5f); b.colors = colors;
-            Text(r, label, 16, 4, w - 32, h - 8, size, primary ? ink : cream, false, TextAlignmentOptions.MidlineLeft);
-            Panel(r, 0, h - 2, w, 2, enabled ? brass : mutedInk);
-            b.onClick.AddListener(() => { if (muted == false) clicks.PlayOneShot(clickClip, .07f); action(); });
-            buttons.Add(b); return b;
+            return StationeryButton(p, label, x, y, w, h, action, enabled, primary, Mathf.Max(size, 23));
         }
+
         void Picture(Transform p, string key, float x, float y, float w, float h, Color? tint = null)
         {
             if (!art.ContainsKey(key) || art[key] == null) { Panel(p, x, y, w, h, mutedInk); return; }
@@ -239,8 +248,10 @@ namespace Halcyon.FirstWeather
         public void Render()
         {
             ClearScreen();
+            PreparePresentation();
             if (title) { DrawTitle(); return; }
             if (state.view == "story") DrawStory();
+            else if (state.view == "evening") DrawEvening();
             else if (state.view == "garden") DrawGarden();
             else if (state.view == "ending") DrawEnding();
             else if (academyExterior) DrawLivingAcademy();
@@ -249,32 +260,37 @@ namespace Halcyon.FirstWeather
         }
         void Header(string right)
         {
-            Panel(screen, 0, 0, 1600, 76, ink); Panel(screen, 0, 74, 1600, 2, brass);
-            Text(screen, "HALCYON ACADEMY", 34, 21, 500, 40, 26, cream, true);
-            Text(screen, right, 480, 24, 580, 34, 20, mint);
-            Button(screen, "Journal  [J]", 1140, 13, 190, 49, () => OpenModal("journal"), true, false, 19);
-            Button(screen, "Pause  [Esc]", 1350, 13, 210, 49, () => OpenModal("pause"), true, false, 19);
+            Ornament(screen, "Header shade", 0, 0, 1600, 160, HalcyonOrnament.Shape.FadeDown, new Color(.13f, .08f, .13f, .88f));
+            Heading(screen, "Halcyon Academy", 38, 20, 480, 57, 29, plum);
+            BookText(screen, right, 505, 29, 560, 34, 22, cream);
+            InkLink(screen, "Journal", 1210, 23, 154, () => OpenModal("journal"));
+            InkLink(screen, "Pause", 1380, 23, 174, () => OpenModal("pause"));
         }
         void DrawTitle()
         {
-            Panel(screen, 0, 0, 1600, 900, ink);
-            Picture(screen, "cover", 740, 0, 860, 900);
-            Panel(screen, 740, 0, 3, 900, brass);
-            Text(screen, "AN ILLUSTRATED STORY OF HALCYON", 70, 82, 630, 40, 18, brass, true);
-            Text(screen, "HALCYON\nACADEMY", 65, 145, 645, 190, 72, cream, true);
-            Text(screen, "FIRST WEATHER", 72, 353, 590, 52, 29, mint);
-            Panel(screen, 72, 426, 95, 3, brass);
-            Text(screen, "Two mornings. A city to discover.\nA place to return to.", 72, 459, 600, 100, 29, cream);
-            Button(screen, "Begin a new story", 72, 598, 555, 62, NewGame, true, true, 26);
-            Button(screen, "Continue your story", 72, 675, 555, 55, ResumeGame, PlayerPrefs.HasKey(SaveKey), false, 23);
-            Button(screen, "How to play", 72, 755, 173, 45, () => OpenModal("help"), true, false, 18);
-            Button(screen, "Settings", 258, 755, 173, 45, () => OpenModal("settings"), true, false, 18);
-            Button(screen, "Credits", 444, 755, 183, 45, () => OpenModal("credits"), true, false, 18);
-            Text(screen, "A capstone prototype by Bergen Carloss  ·  v0.2", 72, 838, 590, 28, 16, brass);
-            Button(screen, "Quit", 1468, 835, 95, 42, Quit, true, false, 18);
+            Picture(screen, "cover", 660, 0, 940, 900);
+            Stationery(screen, "Cloth book cover", 0, 0, 712, 900, true, false);
+            Hairline(screen, 33, 35, 677, 35, brass);
+            Hairline(screen, 33, 865, 677, 865, brass);
+            Hairline(screen, 33, 35, 33, 865, brass);
+            Hairline(screen, 677, 35, 677, 865, brass);
+            BookText(screen, "Bergen Carloss", 76, 83, 560, 38, 27, cream);
+            Heading(screen, "Halcyon\nAcademy", 68, 167, 588, 212, 72, plum);
+            BookText(screen, "First Weather", 77, 389, 535, 62, 40, cream);
+            Hairline(screen, 78, 463, 155, 463, brass);
+            PrinterFlower(screen, 171, 449, brass, 28);
+            BookText(screen, "The city is quiet.\nMolly can still hear it.", 78, 493, 548, 83, 28, cream);
+            Button(screen, "Begin a new story", 78, 607, 548, 58, NewGame, true, false, 28);
+            Button(screen, "Continue your story", 78, 679, 548, 53, ResumeGame, PlayerPrefs.HasKey(SaveKey), true, 26);
+            Button(screen, "How to play", 78, 765, 175, 45, () => OpenModal("help"));
+            Button(screen, "Settings", 268, 765, 169, 45, () => OpenModal("settings"));
+            Button(screen, "Credits", 452, 765, 174, 45, () => OpenModal("credits"));
+            BookText(screen, "An illustrated story  ·  First Weather", 78, 830, 548, 30, 20, cream);
+            MapControl(screen, "Quit", 1460, 822, 98, Quit);
         }
         string TimeLabel()
         {
+            if (state.phase == "evening") return "DAY 01  /  EVENING";
             if (state.phase == "afternoon") return "DAY 01  /  " + (state.slots == 2 ? "14:00" : state.slots == 1 ? "15:00" : "EVENING");
             return "DAY " + state.day.ToString("00") + "  /  " + (state.phase == "arrival" || state.phase == "morning2" ? "08:00" : state.phase == "corridor" ? "11:20" : state.phase == "homecoming" ? "AFTERNOON" : "09:00");
         }
@@ -296,89 +312,59 @@ namespace Halcyon.FirstWeather
         void DrawGauge(Transform parent, float x, float y) { DrawInstrument(parent, x - 12, y - 16, 252); }
         void DrawStory()
         {
+            EnterStoryPage();
             var pages = SliceStory.Get(state.story, state);
             state.page = Mathf.Clamp(state.page, 0, pages.Count - 1);
             var page = pages[state.page];
             Picture(screen, SliceStory.Background(state.story), 0, 35, 1600, 900, state.story == "night" ? new Color32(145, 165, 200, 255) : Color.white);
+            AddSceneLife(screen, SliceStory.Background(state.story));
             Header(TimeLabel());
-            Panel(screen, 38, 104, 445, 50, new Color(ink.r, ink.g, ink.b, .91f));
-            Text(screen, Chapter(), 58, 116, 405, 34, 21, cream);
-            Panel(screen, 0, 541, 1600, 359, ink); Panel(screen, 0, 541, 1600, 2, brass);
-            DrawGauge(screen, 44, 614);
-            Text(screen, page.speaker, 334, 568, 1050, 36, 20, brass, true);
-            Text(screen, page.text, 334, 613, 1220, 203, largeText ? 29 : 26, cream);
-            Text(screen, (state.page + 1).ToString("00") + " / " + pages.Count.ToString("00"), 1450, 570, 107, 30, 17, mint, false, TextAlignmentOptions.Right);
+            DrawSpeakerPortrait(page);
+            DrawComicGutter(page);
+            BookText(screen, Chapter().ToLowerInvariant(), 42, 101, 950, 37, 24, cream);
+            Ornament(screen, "Story shadow", 0, 513, 1600, 56, HalcyonOrnament.Shape.FadeUp, new Color(.17f, .1f, .13f, .58f));
+            Stationery(screen, "Story folio", 0, 551, 1600, 349, false, false);
+            Hairline(screen, 25, 560, 1575, 560, ruleInk);
+            Hairline(screen, 298, 579, 298, 876, new Color(ruleInk.r, ruleInk.g, ruleInk.b, .45f));
+            DrawGauge(screen, 38, 611);
+            BookText(screen, "Molly's barometer", 30, 853, 234, 31, 21, fadedInk, true, TextAlignmentOptions.Center);
+            BookText(screen, page.speaker, 334, 576, 1050, 36, 26, plum);
+            Text(screen, page.text, 334, 618, StoryTextWidth, StoryTextHeight, largeText ? LargerStoryTextSize : StoryTextSize, printedInk);
+            BookText(screen, (state.page + 1).ToString("00") + " / " + pages.Count.ToString("00"), 1430, 579, 107, 30, 20, fadedInk, true, TextAlignmentOptions.Right);
             if (page.choices.Length > 0)
             {
-                float width = (1220f - (page.choices.Length - 1) * 15) / page.choices.Length;
+                float width = (1200f - (page.choices.Length - 1) * 15) / page.choices.Length;
                 for (int i = 0; i < page.choices.Length; i++)
                 {
                     var c = page.choices[i];
-                    Button(screen, c.label, 334 + i * (width + 15), 828, width, 52, () => Advance(c.effect), true, true, page.choices.Length == 3 ? 20 : 21);
+                    Button(screen, c.label, 334 + i * (width + 15), 831, width, 50, () => Advance(c.effect), true, false, ChoiceTextSize);
                 }
             }
             else
             {
-                Text(screen, "Read at your own pace.  Space or Continue to turn the page.", 334, 842, 800, 30, 17, mint);
-                Button(screen, state.page == pages.Count - 1 ? "Continue  →" : "Next  →", 1292, 828, 262, 52, () => Advance(""), true, true, 22);
+                BookText(screen, "Space to turn the page", 334, 842, 740, 32, 22, fadedInk);
+                Button(screen, state.page == pages.Count - 1 ? "Continue  →" : "Next  →", 1272, 831, 262, 50, () => Advance(""), true, true, 25);
             }
         }
+
         string Chapter()
         {
             switch (state.story)
             {
                 case "morning1": return "01  /  A ROOM OF YOUR OWN";
                 case "class1": return "02  /  THE FIRST COHORT";
+                case "callhome": return "04  /  CALLING HOME";
+                case "messagejules": return "04  /  EVENING DISPATCHES";
                 case "night": return "04  /  THE CITY AT NIGHT";
                 case "morning2": return "05  /  WHAT YOU CARRY";
                 case "class2": return "06  /  THE UNFINISHED ANSWER";
                 case "greenhouse": return "07  /  A QUIETER PLACE";
-                case "aftergarden": return "09  /  TOMORROW, PERHAPS";
+                case "aftergarden": return "09  /  THE SIDE LANDING";
                 default: return "03  /  AN AFTERNOON TO CHOOSE";
             }
         }
-        void DrawGarden()
-        {
-            Picture(screen, "greenhouse", 0, 0, 1600, 900);
-            Header("DAY 02  /  LOLA'S WORKSHOP");
-            Panel(screen, 47, 112, 1506, 744, new Color(ink.r, ink.g, ink.b, .96f));
-            Text(screen, "08  /  THE FLOATING GARDEN", 84, 142, 1200, 40, 20, brass, true);
-            Text(screen, state.puzzleRound == 0 ? "Every root needs something different." : "The shade moves. The needs change.", 84, 202, 1400, 67, 42, cream, true);
-            Text(screen, state.puzzleRound == 0 ? "Share 6 measures of water among 3 beds. Match each bed's labeled need, then test circulation. Use − to reclaim water and + to redirect it. There is no timer or penalty for experimenting." : "The afternoon sun has moved. The pump still supplies 6 measures, but the beds now need 2, 3, and 1. Reclaim water from a bed with too much, then redirect it. Observe, adapt, test again.", 84, 285, 1380, 90, largeText ? 29 : 26, cream);
-            string[] names = { "01  ·  HERBS", "02  ·  FLOWERS", "03  ·  SEEDLINGS" };
-            for (int i = 0; i < 3; i++)
-            {
-                int n = i; float x = 85 + i * 478;
-                Panel(screen, x, 411, 440, 213, new Color32(48, 66, 65, 255));
-                Text(screen, names[i], x + 24, 433, 390, 33, 21, brass, true);
-                Text(screen, "Needs " + state.Target(i) + "  /  Receiving " + state.water[i], x + 24, 484, 390, 39, 29, cream);
-                Button(screen, "−", x + 24, 546, 72, 54, () => { state.AdjustWater(n, -1); gardenMessage = ""; Save(); Render(); }, state.water[i] > 0, false, 28);
-                Text(screen, state.water[i] == state.Target(i) ? "BALANCED" : state.water[i] > state.Target(i) ? "TOO MUCH" : "NEEDS WATER", x + 108, 563, 216, 30, 18, mint, true, TextAlignmentOptions.Center);
-                Button(screen, "+", x + 343, 546, 72, 54, () => { state.AdjustWater(n, 1); gardenMessage = ""; Save(); Render(); }, state.WaterUsed < 6 && state.water[i] < 4, true, 28);
-            }
-            Text(screen, "RESERVOIR: " + (6 - state.WaterUsed) + " / 6 available", 86, 658, 600, 40, 24, mint, true);
-            Text(screen, gardenMessage == "" ? (state.mentor == "ecology" ? "Your mentor's question: can the people using this repair it themselves?" : "Your mentor's note: changing conditions require another observation.") : gardenMessage, 86, 708, 1370, 56, 21, cream);
-            Button(screen, "Test circulation", 1115, 773, 394, 57, () => {
-                if (!state.GardenReady) { gardenMessage = "The flow is uneven. Match the printed need on each bed; reclaim spare water with −."; Render(); }
-                else if (state.puzzleRound == 0) { state.GardenShift(); gardenMessage = "First test passed. Now adapt to the afternoon light."; Save(); Render(); }
-                else FinishGarden(true);
-            }, true, true, 23);
-            Button(screen, "Ask Lola for a hint", 85, 773, 310, 57, () => { state.assisted = true; gardenMessage = "LOLA: 'Try " + state.Target(0) + " for the herbs, " + state.Target(1) + " for the flowers, " + state.Target(2) + " for the seedlings. Taking water back is part of the work.'"; Save(); Render(); }, true, false, 21);
-            Button(screen, "Leave a note for tomorrow", 413, 773, 402, 57, () => OpenModal("leavegarden"), true, false, 21);
-        }
-        void DrawEnding()
-        {
-            Picture(screen, "greenhouse", 0, 0, 1600, 900);
-            Panel(screen, 0, 0, 810, 900, new Color(ink.r, ink.g, ink.b, .98f));
-            Text(screen, "HALCYON ACADEMY  /  FIRST WEATHER", 63, 66, 680, 38, 19, brass, true);
-            Text(screen, "A place to\nreturn to.", 60, 149, 700, 175, 67, cream, true);
-            Text(screen, state.solved ? "STORY COMPLETE  ·  GARDEN RESTORED" : "STORY COMPLETE  ·  WORK IN PROGRESS", 66, 379, 680, 40, 23, mint, true);
-            Text(screen, state.solved ? "You adapted the garden to both light conditions.\nMolly and Lola have made something work together." : "The garden needs another trial.\nMolly and Lola will have another afternoon.", 66, 447, 665, 109, 29, cream);
-            Text(screen, "Prepared: " + (state.studied ? "yes" : "not this time") + "   /   Rested: " + (state.rested ? "yes" : "not this time") + "\nConnected with Jules: " + (state.socialized ? "yes" : "not this time") + "\nFinal Pressure: " + state.pressure + " · " + state.Zone + "\nTime in play: " + TimeSpan.FromSeconds(state.playSeconds).ToString(@"mm\:ss"), 66, 588, 665, 137, 23, cream);
-            Button(screen, "Read your journal", 66, 755, 315, 57, () => OpenModal("journal"), true, true);
-            Button(screen, "Return to title", 402, 755, 315, 57, () => { title = true; Render(); }, true, false);
-            Text(screen, "The full story continues beyond this prototype.", 66, 844, 680, 30, 18, brass);
-        }
+        void DrawGarden() { DrawGardenPresentation(); }
+        void DrawEnding() { DrawEndingPresentation(); }
         void FocusNext(int direction)
         {
             var candidates = buttons.FindAll(b => b != null && b.IsActive() && b.interactable && (modal ? b.transform.IsChildOf(overlay) : !b.transform.IsChildOf(overlay == null ? transform : overlay)));
@@ -392,17 +378,20 @@ namespace Halcyon.FirstWeather
             int licensePages = 1;
             if (!title) Save();
             if (overlay != null) { overlay.gameObject.SetActive(false); Destroy(overlay.gameObject); }
+            journalInput = null;
             modal = true; modalKind = kind;
             modalScroll = null;
             screen.GetComponent<CanvasGroup>().interactable = false;
             overlay = Rect("Overlay " + kind, root, 0, 0, 1600, 900);
-            var blocker = Panel(overlay, 0, 0, 1600, 900, new Color(0, .03f, .04f, .84f)); blocker.raycastTarget = true;
-            Panel(overlay, 320, 105, 960, 690, ink); Panel(overlay, 320, 105, 960, 3, brass);
-            string heading = kind == "pause" ? "PAUSED" : kind == "help" ? "YOUR FIRST DAYS IN HALCYON" : kind == "settings" ? "MAKE YOURSELF COMFORTABLE" : kind == "journal" ? "MOLLY'S JOURNAL" : kind == "credits" ? "CREDITS & PROVENANCE" : kind == "licenses" ? "LICENSES & NOTICES" : kind == "leavegarden" ? "LEAVE THE GARDEN FOR TOMORROW?" : "BACK AT YOUR ROOM";
-            Text(overlay, heading, 364, 145, 850, 70, 31, brass, true);
+            var blocker = Panel(overlay, 0, 0, 1600, 900, new Color(.09f, .055f, .085f, .72f)); blocker.raycastTarget = true;
+            Stationery(overlay, "Academy correspondence", 320, 105, 960, 690);
+            Hairline(overlay, 364, 218, 1216, 218, ruleInk);
+            PrinterFlower(overlay, 1200, 147, plum, 28);
+            string heading = kind == "tracks" ? "ACADEMY CONCENTRATIONS" : kind == "pause" ? "PAUSED" : kind == "help" ? "YOUR FIRST DAYS IN HALCYON" : kind == "settings" ? "MAKE YOURSELF COMFORTABLE" : kind == "journal" ? "MOLLY'S JOURNAL" : kind == "credits" ? "CREDITS & PROVENANCE" : kind == "licenses" ? "LICENSES & NOTICES" : kind == "leavegarden" ? "LEAVE THE GARDEN FOR TOMORROW?" : "BACK AT YOUR ROOM";
+            BookText(overlay, System.Globalization.CultureInfo.InvariantCulture.TextInfo.ToTitleCase(heading.ToLowerInvariant()), 364, 148, 816, 63, 39, plum);
             if (kind == "pause")
             {
-                Text(overlay, "Your place is saved.\nTime in play is stopped while this menu is open.", 364, 245, 850, 104, 28, cream);
+                Text(overlay, "Your place is saved.\nTime in play is stopped while this menu is open.", 364, 245, 850, 104, 28, printedInk);
                 Button(overlay, "Resume story  [Esc]", 364, 409, 852, 59, CloseModal, true, true);
                 Button(overlay, "Settings & accessibility", 364, 487, 852, 59, () => OpenModal("settings"));
                 Button(overlay, "How to play", 364, 565, 410, 59, () => OpenModal("help"));
@@ -414,26 +403,41 @@ namespace Halcyon.FirstWeather
                 Button(overlay, "Larger story text: " + (largeText ? "ON" : "OFF"), 364, 251, 852, 61, () => { largeText = !largeText; SaveSettings(); Render(); OpenModal("settings"); });
                 Button(overlay, "Reduced motion: " + (quietMotion ? "ON" : "OFF"), 364, 340, 852, 61, () => { quietMotion = !quietMotion; SaveSettings(); OpenModal("settings"); });
                 Button(overlay, "Audio: " + (muted ? "MUTED" : "ON") + "   [M]", 364, 429, 852, 61, () => { muted = !muted; SaveSettings(); OpenModal("settings"); });
-                Text(overlay, "All information is written as well as colored. There are no timed choices, flashing effects, or audio-only clues. Reduced motion stops gauge tremble and scene fades. Settings persist between visits.", 364, 548, 852, 132, 25, cream);
+                Text(overlay, "All information is written as well as colored. There are no timed choices, flashing effects, or audio-only clues. Reduced motion stills the scene, barometer and transitions. Settings persist between visits.", 364, 548, 852, 132, 25, printedInk);
                 Button(overlay, "Return", 364, 709, 852, 54, CloseModal, true, true);
+            }
+            else if (kind == "tracks")
+            {
+                string[] tracks = { "Ironwork · Marchand", "Inkwork · Delacroix", "Brasswork · Beaumont", "Bridgework · Fontenot", "Greenwork · Thibodaux" };
+                for (int i = 0; i < tracks.Length; i++)
+                {
+                    BookText(overlay, tracks[i], 366, 251 + i * 66, 610, 46, 31, i == 4 ? fadedInk : cream);
+                    BookText(overlay, i == 4 ? "Minor only" : "Primary track", 1000, 259 + i * 66, 213, 35, 23, i == 4 ? fadedInk : plum, true, TextAlignmentOptions.Right);
+                }
+                BookText(overlay, "Per parental recommendation, this concentration is not available as a primary track.", 366, 604, 845, 80, 27, fadedInk);
+                Button(overlay, "Return", 364, 709, 852, 54, CloseModal, true, true);
+            }
+            else if (kind == "journal")
+            {
+                DrawJournalContents(overlay);
             }
             else if (kind == "residence")
             {
-                Text(overlay, "You have " + state.slots + " afternoon " + (state.slots == 1 ? "slot" : "slots") + " left. Rest helps now; ending the day passes the remaining opportunities. Your room contains the " + state.decor + " you chose this morning.", 364, 253, 830, 158, 29, cream);
-                Button(overlay, "Rest  ·  −17 Pressure  ·  1 slot", 364, 461, 852, 58, () => { CloseModal(); DoActivity("rest"); }, state.CanActivity("rest"), true);
-                Button(overlay, "End the day and sleep", 364, 547, 852, 58, () => { CloseModal(); StartStory("night"); });
+                Text(overlay, "You have " + state.slots + " afternoon " + (state.slots == 1 ? "slot" : "slots") + " left. Rest helps now; ending the day passes the remaining opportunities. Your room contains the " + state.decor + " you chose this morning.", 364, 253, 830, 158, 29, printedInk);
+                Button(overlay, "Rest  ·  −13 Pressure  ·  1 slot", 364, 461, 852, 58, () => { CloseModal(); DoActivity("rest"); }, state.CanActivity("rest"), true);
+                Button(overlay, "Return home for the evening", 364, 547, 852, 58, () => { CloseModal(); BeginEvening(); });
                 Button(overlay, "Return to the city", 364, 701, 852, 58, CloseModal);
             }
             else if (kind == "leavegarden")
             {
-                Text(overlay, "You can keep experimenting with no penalty, or finish the story with the garden still in progress. Both routes preserve Molly and Lola's connection. A restored garden requires balancing both light conditions.", 364, 261, 844, 220, 30, cream);
+                Text(overlay, "Leave the pump low and keep the current allocation in the notebook. Molly and Lola can return to the unfinished beds tomorrow.", 364, 261, 844, 220, 30, printedInk);
                 Button(overlay, "Keep working together", 364, 530, 852, 60, CloseModal, true, true);
                 Button(overlay, "Leave a note and finish the story", 364, 634, 852, 60, () => { CloseModal(); FinishGarden(false); });
             }
             else
             {
-                string content = kind == "help" ? "Play as Molly through two short days at the first cross-Ward Academy. Begin each morning at your residence. Follow the map's bright markers. After the first class, choose how to spend two afternoon slots. Your choices change tomorrow.\n\nThe Pressure gauge describes strain: 0–19 Clarity; 20–44 Steady; 45–69 Elevated; 70–100 Overwhelmed. Lower is easier. Pressure never blocks the greenhouse or a relationship.\n\nIn the greenhouse, balance six water measures across three beds, then adapt to a light change. Restore both arrangements for Garden Restored, or leave a note for Work in Progress. Both complete the story.\n\nClick buttons, or use Tab / Shift+Tab and Enter. Space advances a story page without choices. J opens the journal, M mutes audio, Esc pauses. Progress saves after each choice.\n\nContent note: an anxiety/panic episode is described in text. No flashing imagery, forced breathing, or timed responses. Read at your own pace."
-                    : kind == "credits" ? "Concept, world, characters & creative direction\nBergen Carloss\n\nPrototype programming, draft scene writing & original synthesized audio\nCreated with OpenAI Codex under Bergen's direction\n\nEnvironment illustrations\nAI-generated with OpenAI image generation, using the supplied character reference as the art direction. These are prototype assets.\n\nTitle illustration\nUser-supplied Halcyon Academy reference. Its original creator and publication rights still need to be recorded before public distribution.\n\nBarometer housing\nGenerated with OpenAI image generation for this UI pass; scale, needle and readings are drawn live in Unity.\n\nDisplay typography\nCormorant Garamond by Christian Thalmann and the Cormorant Project Authors, SIL Open Font License 1.1. The full license is included in Dependency licenses.\n\nTechnology\nUnity 6.3 LTS · Unity UI / TextMesh Pro · Unity Input System. This slice uses Unity audio directly. Existing Ink, DOTween and FMOD packages remain part of the surrounding project; their notices are retained there.\n\nA fictional city inspired by New Orleans. Draft scenes and mentor/classmate names added for this prototype remain open to creative revision.\n\nFull dependency notices accompany the project in ThirdPartyNotices.txt."
+                string content = kind == "help" ? "Play as Molly through two days at Halcyon Academy. Begin at your residence, attend class and spend two afternoon slots. Studying prepares your work; rest and company change what you carry into tomorrow. You can return home early. Call home, reply to Jules, write in your journal, then sleep.\n\nThe barometer has four bands: Clarity, Manageable, Elevated and Crisis. Morning routines affect its behavior. Read the changing dialogue and watch the needle. A severe classroom episode changes the remaining timetable; the story continues.\n\nThe greenhouse has six measures of water and more need than supply. Use the + and − buttons to distribute water, try the allocation, then respond to the moving shade. Ask Lola for clues. Keeping every bed alive while protecting your mentor’s priority yields Garden Restored; an unfinished garden yields Work in Progress. Both finish the two-day story.\n\nClick, or use Tab / Shift+Tab and Enter. Space advances pages without choices. J opens your journal, M toggles sound, Esc opens pause. Drag to explore the district and academy; use the trackpad to pan, or Command/Ctrl + scroll to zoom. The on-screen buttons also zoom and recenter.\n\nProgress saves after choices and journal edits. New game replaces the current save. Settings include larger story text and reduced motion.\n\nContent note: family pressure and an anxiety/panic episode described in text. No timed responses or flashing imagery."
+                    : kind == "credits" ? "Concept, world, characters & creative direction\nBergen Carloss\n\nPrototype programming, working dialogue draft & original synthesized audio\nOpenAI Codex, under Bergen’s direction. Dialogue remains an editable draft for Bergen.\n\nIllustrations\nUser-supplied September title reference; environments, portraits, student sprites and interface materials generated with OpenAI image generation using that reference. Prototype art, subject to creative review. Title-reference provenance is recorded as supplied by Bergen; original authorship and publication rights must be confirmed before distribution.\n\nTypography\nCinzel Decorative — Natanael Gama\nCormorant Garamond — Christian Thalmann and the Cormorant Project Authors\nSIL Open Font License 1.1; full notices available below.\n\nTechnology\nUnity 6.3 LTS; Unity UI, TextMesh Pro and Input System. Ink by inkle powers story text and choices. DOTween by Demigiant animates the barometer. FMOD — Firelight Technologies Pty Ltd. Other preexisting project dependencies retain their notices. This slice uses original Unity-generated audio.\n\nA fictional city inspired by New Orleans. No documentary or therapeutic claim is intended.\n\nCopyright 2026 Bergen Carloss for original project contributions. Third-party components retain their own copyrights and licenses."
                     : state.journal.Count == 0 ? "Your story begins at the residence." : "DAY " + state.day + "  /  " + state.Zone + "\n\n" + string.Join("\n\n", state.journal.ToArray());
                 if (kind == "licenses")
                 {
@@ -466,7 +470,7 @@ namespace Halcyon.FirstWeather
             var bg = viewport.gameObject.AddComponent<Image>(); bg.color = new Color(0, 0, 0, .02f);
             var sr = viewport.gameObject.AddComponent<ScrollRect>(); sr.horizontal = false; sr.vertical = true; sr.scrollSensitivity = 35;
             modalScroll = sr;
-            var text = Text(viewport, content, 0, 0, w - 25, 2000, 25, cream);
+            var text = Text(viewport, content, 0, 0, w - 25, 2000, 25, printedInk);
             text.ForceMeshUpdate(); float height = text.GetPreferredValues(content, w - 25, 0).y + 20;
             text.rectTransform.sizeDelta = new Vector2(w - 25, Mathf.Max(h, height));
             sr.content = text.rectTransform; sr.viewport = viewport; sr.movementType = ScrollRect.MovementType.Clamped;
@@ -477,7 +481,7 @@ namespace Halcyon.FirstWeather
         }
         void CloseModal()
         {
-            modal = false; modalKind = "";
+            modal = false; modalKind = ""; journalInput = null;
             if (overlay != null) { overlay.gameObject.SetActive(false); Destroy(overlay.gameObject); overlay = null; }
             if (screen != null) screen.GetComponent<CanvasGroup>().interactable = true;
             EventSystem.current.SetSelectedGameObject(null);
@@ -514,6 +518,7 @@ namespace Halcyon.FirstWeather
             for (int i = 0; i < click.Length; i++) click[i] = (float)(Math.Sin(i / (double)sr * 540 * 2 * Math.PI) * Math.Exp(-i / (double)sr * 38));
             clickClip = AudioClip.Create("Brass key - original", click.Length, 1, sr, false); clickClip.SetData(click, 0);
             music.Play(); ambience.Play();
+            soundscape = gameObject.AddComponent<HalcyonSoundscape>();
         }
     }
 }

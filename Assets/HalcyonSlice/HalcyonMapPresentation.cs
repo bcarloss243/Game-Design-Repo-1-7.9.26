@@ -9,7 +9,7 @@ namespace Halcyon.FirstWeather
     // Presentation is separate from story text and progression. Existing saves remain valid.
     public partial class HalcyonSlice
     {
-        TMP_FontAsset displayFont;
+        TMP_FontAsset displayFont, titleFont;
         Texture2D instrumentHousing;
         bool timetableOpen = true;
         readonly Color paper = new Color32(235, 220, 190, 255);
@@ -28,12 +28,19 @@ namespace Halcyon.FirstWeather
                     displayFont.fallbackFontAssetTable = new System.Collections.Generic.List<TMP_FontAsset> { font };
                 }
             }
+            if (titleFont == null)
+            {
+                var source = Resources.Load<Font>("HalcyonFonts/CinzelDecorative-Regular");
+                if (source != null) { titleFont = TMP_FontAsset.CreateFontAsset(source); titleFont.fallbackFontAssetTable = new System.Collections.Generic.List<TMP_FontAsset> { displayFont, font }; }
+            }
             if (instrumentHousing == null)
                 instrumentHousing = Resources.Load<Texture2D>("HalcyonUI/BrassBarometer");
         }
 
         void ReleasePresentation()
         {
+            if (paintedFrame != null) Destroy(paintedFrame);
+            if (titleFont != null) { foreach (var atlas in titleFont.atlasTextures) if (atlas != null) Destroy(atlas); Destroy(titleFont.material); Destroy(titleFont); }
             if (displayFont == null) return;
             foreach (var atlas in displayFont.atlasTextures) if (atlas != null) Destroy(atlas);
             if (displayFont.material != null) Destroy(displayFont.material);
@@ -44,7 +51,7 @@ namespace Halcyon.FirstWeather
             bool serif = true, TextAlignmentOptions align = TextAlignmentOptions.TopLeft, float spacing = 0)
         {
             var t = Text(p, value, x, y, w, h, size, color, false, align);
-            if (serif && displayFont != null) t.font = displayFont;
+            t.font = serif && displayFont != null ? displayFont : font;
             t.characterSpacing = spacing;
             t.lineSpacing = 0;
             return t;
@@ -70,93 +77,66 @@ namespace Halcyon.FirstWeather
 
         void EngravedFrame(Transform p, float x, float y, float w, float h, Color fill)
         {
-            var shadow = Ornament(p, "Soft panel shadow", x + 3, y + 5, w, h, HalcyonOrnament.Shape.CutPanel, new Color(0, 0, 0, .3f));
-            shadow.inset = 7;
-            var plate = Ornament(p, "Enamel panel", x, y, w, h, HalcyonOrnament.Shape.CutPanel, fill);
-            plate.inset = 7;
-            float corner = 8;
-            Color line = new Color(warmGold.r, warmGold.g, warmGold.b, .65f);
-            Hairline(p, x + corner, y, x + w - corner, y, line);
-            Hairline(p, x + corner, y + h, x + w - corner, y + h, line);
-            Hairline(p, x, y + corner, x, y + h - corner, line);
-            Hairline(p, x + w, y + corner, x + w, y + h - corner, line);
-            Hairline(p, x, y + corner, x + corner, y, line);
-            Hairline(p, x + w - corner, y, x + w, y + corner, line);
-            Hairline(p, x, y + h - corner, x + corner, y + h, line);
-            Hairline(p, x + w - corner, y + h, x + w, y + h - corner, line);
+            Stationery(p, "Academy paper", x, y, w, h);
         }
 
         Button MapControl(Transform p, string label, float x, float y, float w, Action action, bool primary = false)
         {
-            var r = Rect(label, p, x, y, w, 45);
-            EngravedFrame(r, 0, 0, w, 45, primary ? paper : new Color32(32, 42, 43, 242));
-            var hit = Panel(r, 0, 0, w, 45, Color.clear); hit.raycastTarget = true;
-            var b = r.gameObject.AddComponent<Button>(); b.targetGraphic = hit;
-            var colors = b.colors;
-            colors.normalColor = Color.clear;
-            colors.highlightedColor = new Color(1, .88f, .63f, .15f);
-            colors.selectedColor = new Color(1, .88f, .63f, .22f);
-            colors.pressedColor = new Color(0, 0, 0, .2f);
-            b.colors = colors;
-            // A white target lets the selectable's tint carry the focus alpha.
-            hit.color = Color.white;
-            b.onClick.AddListener(() => { if (!muted) clicks.PlayOneShot(clickClip, .07f); action(); });
-            BookText(r, label, 12, 5, w - 24, 34, 19, primary ? dialInk : paper, false, TextAlignmentOptions.Center);
-            buttons.Add(b);
-            return b;
+            return StationeryButton(p, label, x, y, w, 45, action, true, primary, 25, true);
         }
+
+        RectTransform mapLayer;
+        HalcyonMapCamera mapCamera;
 
         void DrawMapPresentation()
         {
             PreparePresentation();
-            Picture(screen, "map", 0, 0, 1600, 900);
+            var viewport = Rect("Explorable district", screen, 0, 0, 1600, 900);
+            viewport.gameObject.AddComponent<RectMask2D>();
+            var hit = viewport.gameObject.AddComponent<Image>(); hit.color = Color.clear;
+            mapLayer = Rect("District geography and markers", viewport, 0, 0, 1600, 900);
+            Picture(mapLayer, "map", 0, 0, 1600, 900); AddSceneLife(mapLayer, "map");
+            mapCamera = viewport.gameObject.AddComponent<HalcyonMapCamera>();
+            mapCamera.world = mapLayer; mapCamera.blocked = () => modal || title; mapCamera.quiet = () => quietMotion;
             Ornament(screen, "Quiet upper edge", 0, 0, 1600, 190, HalcyonOrnament.Shape.FadeDown, new Color(.07f, .085f, .1f, .78f));
             Ornament(screen, "Quiet lower edge", 0, 632, 1600, 268, HalcyonOrnament.Shape.FadeUp, new Color(.06f, .09f, .1f, .88f));
 
-            Color hairline = new Color(warmGold.r, warmGold.g, warmGold.b, .46f);
-            Hairline(screen, 26, 26, 1574, 26, hairline);
-            Hairline(screen, 26, 26, 26, 118, hairline);
-            Hairline(screen, 1574, 26, 1574, 118, hairline);
-            Hairline(screen, 26, 874, 26, 827, hairline);
-            Hairline(screen, 1574, 874, 1574, 827, hairline);
-            Hairline(screen, 340, 874, 1574, 874, hairline);
-            BookText(screen, "Halcyon", 50, 41, 450, 92, 72, new Color(0, 0, 0, .5f));
-            BookText(screen, "Halcyon", 48, 38, 450, 92, 72, paper);
-            BookText(screen, "A C A D E M Y   D I S T R I C T", 54, 118, 435, 30, 17, warmGold, false);
-            Hairline(screen, 55, 157, 125, 157, warmGold);
-            Ornament(screen, "Title lozenge", 137, 152, 10, 10, HalcyonOrnament.Shape.Diamond, warmGold);
-            Hairline(screen, 160, 157, 231, 157, warmGold);
-
-            BookText(screen, TimeLabel().Replace(" / ", "  ·  "), 888, 46, 650, 33, 19, paper, false, TextAlignmentOptions.Right, 1.4f);
-            MapControl(screen, "Journal  ·  J", 1110, 94, 154, () => OpenModal("journal"));
-            MapControl(screen, "Settings", 1276, 94, 130, () => OpenModal("settings"));
-            MapControl(screen, "Pause", 1418, 94, 136, () => OpenModal("pause"));
+            RunningTitle(screen, "Halcyon", "Academy district", 43, 39, 460);
+            BookText(screen, TimeLabel().Replace(" / ", "  ·  "), 1080, 36, 470, 35, 23, cream, true, TextAlignmentOptions.Right);
+            InkLink(screen, "Tracks", 955, 86, 132, () => OpenModal("tracks"));
+            InkLink(screen, "Journal", 1110, 86, 154, () => OpenModal("journal"));
+            InkLink(screen, "Settings", 1276, 86, 130, () => OpenModal("settings"));
+            InkLink(screen, "Pause", 1418, 86, 136, () => OpenModal("pause"));
 
             bool morning = state.phase == "arrival" || state.phase == "morning2";
             bool afternoon = state.phase == "afternoon";
             bool greenhouse = state.phase == "corridor" || state.phase == "homecoming";
-            MapPlace("Residence", morning ? "BEGIN HERE" : afternoon ? (state.slots == 0 ? "SLEEP" : "REST / END DAY") : "MORNING COMPLETE", 510, 334,
+            MapPlace("Residence", morning ? "BEGIN HERE" : afternoon ? (state.slots == 0 ? "EVENING AT HOME" : "REST / EVENING") : "MORNING COMPLETE", 290, 264,
                 morning || afternoon, true, () => {
                     if (morning) StartStory(state.day == 1 ? "morning1" : "morning2");
-                    else if (state.slots == 0) StartStory("night"); else OpenModal("residence");
+                    else if (state.slots == 0) BeginEvening(); else OpenModal("residence");
                 });
             MapPlace("The Academy", state.phase == "class1" || state.phase == "class2" ? "CLASS IS BEGINNING" : "EXPLORE THE GROUNDS", 804, 220,
                 true, true, OpenAcademyExterior);
-            MapPlace("Reading Room", state.studied ? "PREPARED" : afternoon ? "+12 PRESSURE  ·  1 SLOT" : "AFTER CLASS", 687, 467,
+            MapPlace("Reading Room", state.studied ? "PREPARED" : afternoon ? "PREPARE  ·  +" + state.ActivityDelta("study") + "  ·  1 SLOT" : "AFTER CLASS", 390, 452,
                 state.CanActivity("study"), true, () => DoActivity("study"));
-            MapPlace("Canal Steps", state.socialized ? "VISITED" : afternoon ? "−9 PRESSURE  ·  1 SLOT" : "AFTER CLASS", 1005, 615,
+            MapPlace("Canal Steps", state.socialized ? "VISITED" : afternoon ? "MEET JULES  ·  −7  ·  1 SLOT" : "AFTER CLASS", 1005, 615,
                 state.CanActivity("social"), true, () => DoActivity("social"));
-            MapPlace("Greenhouse", greenhouse ? (state.phase == "homecoming" ? "FINISH THE STORY" : "OPEN TO VISIT") : "UNDISCOVERED", 1253, 316,
+            MapPlace("Greenhouse", greenhouse ? (state.phase == "homecoming" ? "READ LOLA’S MESSAGE" : "FIND SOMEWHERE QUIET") : "UNDISCOVERED", 1253, 360,
                 greenhouse, greenhouse, () => {
                     if (state.phase == "homecoming") { state.finished = true; state.view = "ending"; Save(); Render(); }
                     else StartStory("greenhouse");
                 });
 
             DrawInstrument(screen, 27, 555, 308);
-            BookText(screen, "MOLLY'S BAROMETER", 52, 852, 257, 25, 15, paper, false, TextAlignmentOptions.Center, 1.4f);
+            BookText(screen, "Duvernay · Halcyon", 52, 850, 257, 33, 23, cream, true, TextAlignmentOptions.Center);
             DrawTimetable();
-            BookText(screen, "SELECT AN OPEN LOCATION", 360, 816, 670, 27, 17, paper, false, TextAlignmentOptions.Left, 1.2f);
-            BookText(screen, "Filled diamond: open    ·    Hollow: unavailable", 360, 847, 710, 26, 17, paper, false);
+            InkLink(screen, "−", 360, 752, 52, () => mapCamera.ZoomBy(-.15f));
+            InkLink(screen, "+", 422, 752, 52, () => mapCamera.ZoomBy(.15f));
+            InkLink(screen, "Recenter", 496, 752, 154, () => mapCamera.ResetView());
+            BookText(screen, "Drag or scroll to explore", 674, 760, 450, 31, 23, cream);
+            BookText(screen, "Where will you go?", 360, 816, 670, 36, 29, cream);
+            BookText(screen, "Filled marker · open    /    Outline · unavailable", 360, 852, 710, 30, 21, cream);
         }
 
         void DrawTimetable()
@@ -164,50 +144,43 @@ namespace Halcyon.FirstWeather
             const float x = 1165, w = 389;
             if (!timetableOpen)
             {
-                MapControl(screen, "Open timetable", x, 811, w, () => { timetableOpen = true; Render(); });
+                MapControl(screen, "Today's timetable", x, 811, w, () => { timetableOpen = true; Render(); });
                 return;
             }
-            EngravedFrame(screen, x, 652, w, 204, new Color32(31, 42, 43, 248));
-            BookText(screen, "Today's timetable", x + 22, 666, 288, 43, 33, paper);
-            var close = MapControl(screen, "−", x + w - 62, 664, 42, () => { timetableOpen = false; Render(); });
-            close.gameObject.name = "Fold timetable";
-            Hairline(screen, x + 22, 718, x + w - 22, 718, new Color(warmGold.r, warmGold.g, warmGold.b, .5f));
+            Stationery(screen, "Folded timetable", x, 652, w, 218);
+            BookText(screen, "Today's timetable", x + 22, 667, 288, 46, 33, plum);
+            MapControl(screen, "−", x + w - 59, 664, 42, () => { timetableOpen = false; Render(); }).gameObject.name = "Fold timetable";
+            Hairline(screen, x + 22, 719, x + w - 22, 719, ruleInk);
             string task = state.phase == "arrival" || state.phase == "morning2" ? "Begin at your residence." :
                 state.phase == "class1" || state.phase == "class2" ? "Your next class is at the Academy." :
-                state.phase == "afternoon" ? (state.slots > 0 ? "Choose how to spend your afternoon." : "Return to your residence to sleep.") :
-                state.phase == "corridor" ? "Visit the greenhouse." : "Return to the greenhouse to finish.";
-            BookText(screen, task, x + 22, 731, w - 44, 65, largeText ? 27 : 25, paper);
-            string status = state.phase == "afternoon" ? state.slots + " OF 2 AFTERNOON SLOTS LEFT" :
-                state.phase == "arrival" || state.phase == "morning2" ? "MORNING" :
-                state.phase == "corridor" || state.phase == "homecoming" ? "AFTER CLASS" : "CLASS TIME";
-            BookText(screen, status, x + 22, 812, w - 44, 25, 16, warmGold, false, TextAlignmentOptions.Left, .5f);
+                state.phase == "afternoon" ? (state.slots > 0 ? "Choose how to spend your afternoon." : "Return home for the evening.") :
+                state.phase == "corridor" ? "Visit the greenhouse." : "A message from Lola is waiting.";
+            BookText(screen, task, x + 22, 732, w - 44, 82, largeText ? 29 : 27, printedInk);
+            string status = state.phase == "afternoon" ? state.slots + " of 2 afternoon slots left" :
+                state.phase == "arrival" || state.phase == "morning2" ? "Morning" :
+                state.phase == "corridor" || state.phase == "homecoming" ? "After class" : "Class time";
+            BookText(screen, status, x + 22, 827, w - 44, 28, 21, fadedInk);
         }
 
         void MapPlace(string label, string detail, float x, float y, bool available, bool discovered, Action action)
         {
             const float width = 250;
-            var r = Rect("Location: " + label, screen, x - width / 2, y - 12, width, 107);
-            var pinShadow = Ornament(r, "Pin shadow", 111, 2, 28, 28, HalcyonOrnament.Shape.Diamond, new Color(0, 0, 0, .65f));
-            Ornament(r, "Map pin", 113, 0, 24, 24, available ? HalcyonOrnament.Shape.Diamond : HalcyonOrnament.Shape.DiamondOutline,
-                available ? paper : new Color32(220, 206, 181, 255));
-            if (available) Ornament(r, "Pin center", 121, 8, 8, 8, HalcyonOrnament.Shape.Diamond, dialInk);
-            Hairline(r, 125, 27, 125, 37, warmGold);
-            var plate = Ornament(r, "Location label", 0, 38, width, 64, HalcyonOrnament.Shape.CutPanel,
-                available ? new Color32(33, 48, 46, 249) : new Color32(32, 37, 41, 235));
-            plate.inset = 6;
-            Hairline(r, 12, 38, width - 12, 38, available ? warmGold : new Color32(154, 143, 123, 255));
-            BookText(r, discovered ? label : "?  " + label, 10, 39, width - 20, 39, 29, paper, true, TextAlignmentOptions.Center);
-            BookText(r, detail, 10, 78, width - 20, 22, 14, available ? warmGold : new Color32(206, 199, 182, 255), false, TextAlignmentOptions.Center, .35f);
-            var hit = Panel(r, 0, 0, width, 107, Color.white); hit.raycastTarget = available;
+            var r = Rect("Location: " + label, mapLayer, x - width / 2, y - 12, width, 114);
+            Ornament(r, "Pin shadow", 111, 2, 28, 28, HalcyonOrnament.Shape.Diamond, new Color(.12f, .06f, .1f, .7f));
+            Ornament(r, "Map pin", 113, 0, 24, 24, available ? HalcyonOrnament.Shape.Diamond : HalcyonOrnament.Shape.DiamondOutline, cream);
+            if (available) Ornament(r, "Pin center", 121, 8, 8, 8, HalcyonOrnament.Shape.Diamond, plum);
+            Hairline(r, 125, 27, 125, 39, brass);
+            Stationery(r, "Printed location ticket", 0, 38, width, 73, !available);
+            BookText(r, discovered ? label : "?  " + label, 10, 40, width - 20, 38, 30, available ? plum : cream, true, TextAlignmentOptions.Center);
+            BookText(r, detail.ToLowerInvariant(), 8, 79, width - 16, 29, 20, available ? fadedInk : cream, true, TextAlignmentOptions.Center);
+            var hit = Panel(r, 0, 0, width, 114, Color.white); hit.raycastTarget = available;
             var b = r.gameObject.AddComponent<Button>(); b.targetGraphic = hit;
             var colors = b.colors; colors.normalColor = Color.clear;
-            colors.highlightedColor = new Color(1, .89f, .7f, .1f);
-            colors.selectedColor = new Color(1, .89f, .7f, .16f);
-            colors.pressedColor = new Color(.1f, .1f, .1f, .2f);
+            colors.highlightedColor = new Color(.35f, .16f, .23f, .10f);
+            colors.selectedColor = colors.highlightedColor; colors.pressedColor = new Color(.15f, .07f, .12f, .24f);
             colors.disabledColor = Color.clear; b.colors = colors; b.interactable = available;
-            var focus = Ornament(r, "Location focus", -4, 34, width + 8, 74, HalcyonOrnament.Shape.CutOutline, warmGold);
-            focus.inset = 8;
-            focus.gameObject.SetActive(false);
+            var focus = Ornament(r, "Location focus", 3, 41, width - 6, 67, HalcyonOrnament.Shape.CutOutline, available ? plum : cream);
+            focus.inset = 0; focus.gameObject.SetActive(false);
             r.gameObject.AddComponent<HalcyonMapFocus>().outline = focus.gameObject;
             b.onClick.AddListener(() => { if (!muted) clicks.PlayOneShot(clickClip, .07f); action(); });
             buttons.Add(b);
@@ -248,16 +221,21 @@ namespace Halcyon.FirstWeather
                 Hairline(r, c + Mathf.Sin(a) * outer, c - Mathf.Cos(a) * outer,
                     c + Mathf.Sin(b) * outer, c - Mathf.Cos(b) * outer, zone, size * .011f);
             }
-            BookText(r, "PRESSURE", size * .27f, size * .354f, size * .46f, size * .082f, size * .057f, dialInk, false, TextAlignmentOptions.Center, .9f);
-            var pointer = Ornament(r, "Live Pressure needle", c, c, size * .025f, size * .245f, HalcyonOrnament.Shape.Needle, dialInk);
-            needle = pointer.rectTransform;
-            needle.pivot = new Vector2(.5f, 0);
-            needle.anchoredPosition = new Vector2(c, -c);
-            needle.localEulerAngles = new Vector3(0, 0, Mathf.Lerp(120, -120, displayedPressure / 100f));
-            Ornament(r, "Brass spindle", c - size * .031f, c - size * .031f, size * .062f, size * .062f, HalcyonOrnament.Shape.Disc, new Color32(152, 110, 55, 255));
-            Ornament(r, "Spindle light", c - size * .015f, c - size * .019f, size * .025f, size * .025f, HalcyonOrnament.Shape.Disc, warmGold);
-            gaugeValue = BookText(r, state.pressure + " / 100", size * .25f, size * .56f, size * .5f, size * .12f, size * .092f, dialInk, true, TextAlignmentOptions.Center);
-            BookText(r, state.Zone, size * .21f, size * .698f, size * .58f, size * .092f, size * .047f, dialInk, false, TextAlignmentOptions.Center, .5f);
+            DrawPortrait(r, "molly", size * .355f, size * .325f, size * .29f, size * .29f, true);
+            var pointer = Ornament(r, "Live Pressure needle", c, c, size * .019f, size * .258f, HalcyonOrnament.Shape.Needle, dialInk);
+            needle = pointer.rectTransform; needle.pivot = new Vector2(.5f, 0); needle.anchoredPosition = new Vector2(c, -c);
+            Ornament(r, "Needle pivot", c - size * .017f, c - size * .017f, size * .034f, size * .034f, HalcyonOrnament.Shape.Disc, warmGold);
+            BookText(r, state.Zone, size * .21f, size * .625f, size * .58f, size * .09f, size * .055f, dialInk, false, TextAlignmentOptions.Center);
+            BookText(r, "HALCYON", size * .30f, size * .734f, size * .4f, size * .064f, size * .05f, dialInk, true, TextAlignmentOptions.Center);
+            PrinterFlower(r, size * .46f, size * .80f, dialInk, size * .075f);
+            for (int vent = 0; vent < 3; vent++) Hairline(r, size * (.46f + vent * .04f), size * .11f, size * (.46f + vent * .04f), size * .16f, dialInk, size * .007f);
+            Hairline(r, size * .24f, size * .94f, size * .76f, size * .94f, dialInk, size * .018f);
+            gaugeFeel = r.gameObject.AddComponent<PressureGaugeFeel>();
+            gaugeFeel.needle = needle; gaugeFeel.needleGraphic = pointer;
+            gaugeFeel.angleAtZero = 120; gaugeFeel.angleAtHundred = -120;
+            gaugeFeel.reducedMotion = quietMotion; gaugeFeel.paused = modal;
+            gaugeFeel.Initialize(displayedPressure); gaugeFeel.SetPressure(state.pressure);
+
         }
     }
 

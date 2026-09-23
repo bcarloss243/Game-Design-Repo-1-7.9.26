@@ -31,7 +31,9 @@ namespace Halcyon.FirstWeather
 
         sealed class Walker
         {
-            public RectTransform root, leftLeg, rightLeg, leftArm, rightArm;
+            public RectTransform root;
+            public RawImage sprite;
+            public int row;
             public CanvasGroup alpha;
             public Vector2[] path;
             public float phase, duration, size;
@@ -47,48 +49,43 @@ namespace Halcyon.FirstWeather
             isPaused = paused; reducedMotion = quiet; clockHour = hour;
             world = Node("Academy world", transform, 0, 0, 1600, 900);
             background = Node("Distant city and paving", world, 0, 0, 1600, 900);
-            Artwork(background, "Distant sky extension", ground, -200, -280, 2000, 460).uvRect = new Rect(0, .68f, 1, .32f);
-            Artwork(background, "Forecourt and distant skyline", ground, -200, -25, 2000, 1143);
+            Artwork(background, "Enclosed court and neighboring buildings", ground, 0, 0, 1600, 900);
             Glow(background, "Late light", 1000, 50, 640, 490, new Color(1, .75f, .5f, .07f));
 
             architecture = Node("Architecture and attached details", world, 0, 0, 1600, 900);
-            Glow(architecture, "Building contact shadow", 270, 600, 1060, 150, new Color(.08f, .08f, .08f, .34f));
-            var facade = Node("Academy building silhouette", architecture, 260, 30, 1080, 720).gameObject.AddComponent<AcademyFacadeGraphic>();
-            facade.texture = building; facade.raycastTarget = false;
+            // Architecture and paving share one painted perspective; people and details remain live layers.
             // Coordinates are in the architecture's source image, keeping details attached during navigation.
-            var clock = BuildingPoint(769, 330);
-            hourHand = Hand("Hour hand", clock, 13, 2.4f, Ink);
-            minuteHand = Hand("Minute hand", clock, 19, 1.6f, Ink);
-            secondHand = Hand("Second hand", clock, 21, .8f, new Color32(137, 79, 56, 255));
+            var clock = BuildingPoint(828, 220);
+            hourHand = Hand("Hour hand", clock, 18, 2.4f, Ink);
+            minuteHand = Hand("Minute hand", clock, 26, 1.6f, Ink);
+            secondHand = Hand("Second hand", clock, 27, .8f, new Color32(137, 79, 56, 255));
             Shape(architecture, "Clock spindle", clock.x - 2, clock.y - 2, 4, 4, AcademyInkGraphic.Form.Disc, Brass);
 
-            foreach (var p in new[] { new Vector2(595, 618), new Vector2(944, 618), new Vector2(595, 715), new Vector2(944, 715), new Vector2(651, 715), new Vector2(883, 715), new Vector2(430, 648), new Vector2(1107, 648), new Vector2(326, 755), new Vector2(1212, 755) })
+            foreach (var p in new[] { new Vector2(493, 535), new Vector2(692, 518), new Vector2(966, 521), new Vector2(1163, 536), new Vector2(493, 375), new Vector2(697, 365), new Vector2(969, 369), new Vector2(1162, 381) })
             {
                 var q = BuildingPoint(p.x, p.y);
-                glows.Add(Glow(architecture, "Occupied window", q.x - 9, q.y - 18, 18, 36, new Color(1, .78f, .4f, .15f)));
+                glows.Add(Glow(architecture, "Occupied window", q.x - 9, q.y - 18, 18, 36, new Color(1, .78f, .4f, .12f)));
             }
-            foreach (var p in new[] { new Vector2(698, 754), new Vector2(838, 754), new Vector2(365, 862), new Vector2(1173, 862), new Vector2(152, 906), new Vector2(1384, 906) })
+            foreach (var p in new[] { new Vector2(764, 484), new Vector2(899, 484) })
             {
                 var q = BuildingPoint(p.x, p.y);
-                glows.Add(Glow(architecture, "Lantern light", q.x - 18, q.y - 22, 36, 44, new Color(1, .78f, .4f, .28f)));
-                Shape(architecture, "Lantern heart", q.x - 1.8f, q.y - 3, 3.6f, 6, AcademyInkGraphic.Form.Disc, Lamp);
+                glows.Add(Glow(architecture, "Entrance lantern", q.x - 16, q.y - 20, 32, 40, new Color(1, .78f, .4f, .15f)));
             }
-            AddBanner(582, 669, new Color32(70, 105, 97, 255));
-            AddBanner(1008, 669, new Color32(126, 81, 96, 255));
+
 
             // Routes stay on the open forecourt and central stairs, clear of the wings.
             for (int i = 0; i < 8; i++)
             {
                 bool stairs = i % 3 == 0;
                 Vector2[] route = stairs
-                    ? new[] { new Vector2(450, 756), new Vector2(680, 730), new Vector2(800, 683), new Vector2(800, 604) }
-                    : new[] { new Vector2(405, 753 + (i % 3) * 15), new Vector2(700, 764 + (i % 2) * 16), new Vector2(1000, 750 + (i % 3) * 15), new Vector2(1220, 721 + (i % 2) * 18) };
+                    ? new[] { new Vector2(320, 678), new Vector2(645, 678), new Vector2(831, 623), new Vector2(831, 579) }
+                    : new[] { new Vector2(300, 665 + (i % 3) * 13), new Vector2(650, 678 + (i % 2) * 15), new Vector2(1000, 664 + (i % 3) * 12), new Vector2(1310, 657 + (i % 2) * 15) };
                 if (i % 2 == 1) Array.Reverse(route);
-                AddStudent(route, i * .137f, 36 + i * 4, 22 + i % 3 * 2, i);
+                AddStudent(route, i * .137f, 36 + i * 4, 76 + i % 3 * 3, i);
             }
 
             nearLayer = Node("Near water and airborne leaves", world, 0, 0, 1600, 900);
-            Artwork(nearLayer, "Near reflecting channel", ground, -200, 781, 2000, 160).uvRect = new Rect(0, 0, 1, .14f);
+            Artwork(nearLayer, "Near reflecting channel", ground, 0, 720, 1600, 180).uvRect = new Rect(0, 0, 1, .2f);
             for (int i = 0; i < 55; i++)
             {
                 float x = 100 + i * 26.1f, y = 806 + i % 7 * 6;
@@ -106,7 +103,7 @@ namespace Halcyon.FirstWeather
             Animate(0); ApplyCamera(true);
         }
 
-        static Vector2 BuildingPoint(float x, float y) => new Vector2(260 + x * 1080 / 1536, 30 + y * 720 / 1024);
+        static Vector2 BuildingPoint(float x, float y) => new Vector2(x, y);
 
         RectTransform Hand(string name, Vector2 at, float length, float width, Color color)
         {
@@ -127,22 +124,11 @@ namespace Halcyon.FirstWeather
 
         void AddStudent(Vector2[] route, float phase, float duration, float height, int variant)
         {
-            var w = new Walker { path = route, phase = phase, duration = duration, size = height };
-            w.root = Node("Student following forecourt route " + variant, world, 0, 0, 20, height);
+            var w = new Walker { path = route, phase = phase, duration = duration, size = height, row = variant % 2 };
+            w.root = Node("Student following forecourt route " + variant, world, 0, 0, height * .75f, height);
             w.alpha = w.root.gameObject.AddComponent<CanvasGroup>();
-            Shape(w.root, "Contact shadow", -6, height - 2, 21, 4, AcademyInkGraphic.Form.Disc, new Color(.07f, .085f, .075f, .23f));
-            w.leftLeg = Shape(w.root, "Left step", 4, height * .59f, 3, height * .37f, AcademyInkGraphic.Form.Quad, Ink).rectTransform;
-            w.rightLeg = Shape(w.root, "Right step", 8, height * .59f, 3, height * .37f, AcademyInkGraphic.Form.Quad, Ink).rectTransform;
-            Color coat = variant % 3 == 0 ? new Color32(89, 106, 100, 255) : variant % 3 == 1 ? new Color32(101, 73, 79, 255) : new Color32(72, 84, 99, 255);
-            Shape(w.root, "Ink coat outline", 1, height * .21f, 13, height * .52f, AcademyInkGraphic.Form.Coat, Ink);
-            Shape(w.root, "Student coat", 2, height * .24f, 11, height * .46f, AcademyInkGraphic.Form.Coat, coat);
-            w.leftArm = Shape(w.root, "Left arm", 0, height * .27f, 2.3f, height * .29f, AcademyInkGraphic.Form.Quad, coat).rectTransform;
-            w.rightArm = Shape(w.root, "Right arm", 13, height * .27f, 2.3f, height * .29f, AcademyInkGraphic.Form.Quad, coat).rectTransform;
-            Shape(w.root, "Head silhouette", 4, 0, 7, height * .25f, AcademyInkGraphic.Form.Disc, Ink);
-            Shape(w.root, "Face in profile", 5, height * .045f, 5.5f, height * .18f, AcademyInkGraphic.Form.Disc,
-                variant % 2 == 0 ? new Color32(168, 118, 85, 255) : new Color32(209, 167, 134, 255));
-            Shape(w.root, "Hair", 4, 0, 7, height * .11f, AcademyInkGraphic.Form.Disc, Ink);
-            Shape(w.root, "Satchel", 0, height * .46f, 5, height * .19f, AcademyInkGraphic.Form.Coat, new Color32(147, 108, 66, 255));
+            w.sprite = Artwork(w.root, "Painted student walk cycle", Resources.Load<Texture2D>("HalcyonArtV3/students"), -height * .375f, -height, height * .75f, height);
+            w.sprite.uvRect = new Rect(0, w.row == 0 ? .5f : 0, .25f, .5f);
             walkers.Add(w);
         }
 
@@ -192,10 +178,9 @@ namespace Halcyon.FirstWeather
                 float depth = Mathf.Lerp(.78f, 1.1f, Mathf.InverseLerp(600, 800, p.y));
                 w.root.anchoredPosition = new Vector2(p.x, -p.y - Mathf.Abs(stride) * .7f);
                 w.root.localScale = Vector3.one * depth;
-                w.leftLeg.localEulerAngles = new Vector3(0, 0, stride * 17);
-                w.rightLeg.localEulerAngles = new Vector3(0, 0, -stride * 17);
-                w.leftArm.localEulerAngles = new Vector3(0, 0, -stride * 12);
-                w.rightArm.localEulerAngles = new Vector3(0, 0, stride * 12);
+                int frame = cycle < .84f ? Mathf.FloorToInt((t + w.phase) * 5) % 4 : 1;
+                bool left = w.path[at + 1].x < w.path[at].x;
+                w.sprite.uvRect = new Rect((frame + (left ? 1 : 0)) / 4f, w.row == 0 ? .5f : 0, left ? -.25f : .25f, .5f);
                 // Fade at route endpoints prevents teleporting when a route restarts.
                 w.alpha.alpha = Mathf.Min(Mathf.Clamp01(cycle * 25), Mathf.Clamp01((.91f - cycle) * 25));
             }
@@ -212,7 +197,7 @@ namespace Halcyon.FirstWeather
         {
             scale = Mathf.Clamp(scale, MinZoom, MaxZoom);
             float halfW = 800 / scale, halfH = 450 / scale;
-            return new Vector2(Mathf.Clamp(value.x, -190 + halfW, 1790 - halfW), Mathf.Clamp(value.y, -200 + halfH, 920 - halfH));
+            return new Vector2(Mathf.Clamp(value.x, halfW, 1600 - halfW), Mathf.Clamp(value.y, halfH, 900 - halfH));
         }
 
         public static Vector2 ZoomAnchor(Vector2 current, float oldZoom, float newZoom, Vector2 screenPoint)
@@ -233,14 +218,14 @@ namespace Halcyon.FirstWeather
             var position = OverviewCenter - center * zoom;
             world.anchoredPosition = new Vector2(position.x, -position.y);
             // Attached building details share one layer; only depth planes receive differential movement.
-            Vector2 offset = reducedMotion() ? Vector2.zero : (center - OverviewCenter) * .035f;
-            background.anchoredPosition = new Vector2(offset.x, -offset.y);
+            Vector2 offset = reducedMotion() ? Vector2.zero : (center - OverviewCenter) * .012f;
+            background.anchoredPosition = Vector2.zero;
             nearLayer.anchoredPosition = new Vector2(-offset.x, offset.y);
         }
 
         public void Overview() { targetZoom = 1; targetCenter = OverviewCenter; }
         public void FocusEntrance() { targetZoom = 1.72f; targetCenter = ClampCenter(new Vector2(800, 588), targetZoom); }
-        public void FocusTower() { targetZoom = 1.85f; targetCenter = ClampCenter(new Vector2(800, 272), targetZoom); }
+        public void FocusTower() { targetZoom = 1.85f; targetCenter = ClampCenter(new Vector2(828, 220), targetZoom); }
         public void ChangeZoom(float delta) => SetZoom(targetZoom + delta, OverviewCenter);
         void SetZoom(float value, Vector2 screenPoint)
         {
@@ -248,7 +233,7 @@ namespace Halcyon.FirstWeather
             targetCenter = ClampCenter(ZoomAnchor(targetCenter, targetZoom, next, screenPoint), next);
             targetZoom = next;
         }
-        public void OnBeginDrag(PointerEventData e) { if (!isPaused()) dragging = true; }
+        public void OnBeginDrag(PointerEventData e) { if (!isPaused()) { dragging = true; e.eligibleForClick = false; if (targetZoom < 1.15f) targetZoom = 1.15f; } }
         public void OnEndDrag(PointerEventData e) { dragging = false; }
         public void OnDrag(PointerEventData e)
         {
@@ -265,7 +250,7 @@ namespace Halcyon.FirstWeather
                 RectTransformUtility.ScreenPointToLocalPointInRectangle((RectTransform)transform, e.position, e.pressEventCamera, out var p);
                 SetZoom(targetZoom + Mathf.Clamp(e.scrollDelta.y, -3, 3) * .06f, new Vector2(p.x, -p.y));
             }
-            else targetCenter = ClampCenter(targetCenter + new Vector2(-Mathf.Clamp(e.scrollDelta.x, -8, 8), Mathf.Clamp(e.scrollDelta.y, -8, 8)) * 26 / targetZoom, targetZoom);
+            else { if (targetZoom < 1.15f) targetZoom = 1.15f; targetCenter = ClampCenter(targetCenter + new Vector2(-Mathf.Clamp(e.scrollDelta.x, -8, 8), Mathf.Clamp(e.scrollDelta.y, -8, 8)) * 26 / targetZoom, targetZoom); }
             e.Use();
         }
 

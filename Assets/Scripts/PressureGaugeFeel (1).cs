@@ -28,6 +28,17 @@ public class PressureGaugeFeel : MonoBehaviour
     [Header("Wiring (auto-found if empty)")]
     public RectTransform needle;
     public Image needleImage;
+    public Graphic needleGraphic;
+    public bool demoKeys = true, reducedMotion, paused;
+    public float trembleMultiplier = 1;
+    float motionTime;
+
+    public void Initialize(float value)
+    {
+        demoKeys = false;
+        displayedPressure = targetPressure = Mathf.Clamp(value, 0, 100);
+        currentZone = ZoneOf(value); ApplyNeedle();
+    }
 
     [Header("Needle sweep")]
     public float angleAtZero = 70f;     // needle angle at pressure 0 (clarity side)
@@ -73,7 +84,14 @@ public class PressureGaugeFeel : MonoBehaviour
 
     void Update()
     {
-        HandleTestKeys();
+        if (paused) { sweepTween?.Pause(); transform.DOPause(); return; }
+        if (reducedMotion)
+        {
+            sweepTween?.Kill(); displayedPressure = targetPressure;
+            transform.DOKill(); transform.localScale = Vector3.one;
+        }
+        else { sweepTween?.Play(); transform.DOPlay(); motionTime += Time.unscaledDeltaTime; }
+        if (demoKeys) HandleTestKeys();
         ApplyNeedle();
     }
 
@@ -93,20 +111,23 @@ public class PressureGaugeFeel : MonoBehaviour
 
     public void SetPressure(float value)
     {
-        targetPressure = Mathf.Clamp(value, 0f, 100f);
+        value = Mathf.Clamp(value, 0f, 100f);
+        if (Mathf.Approximately(value, targetPressure)) return;
+        targetPressure = value;
 
         int newZone = ZoneOf(targetPressure);
         if (newZone != currentZone)
         {
             currentZone = newZone;
             transform.DOKill(true);
-            transform.DOPunchScale(Vector3.one * punchStrength, punchDuration, 8, 0.7f);
+            transform.localScale = Vector3.one;
+            if (!reducedMotion) transform.DOPunchScale(Vector3.one * punchStrength, punchDuration, 8, 0.7f).SetUpdate(true);
         }
 
         sweepTween?.Kill();
         sweepTween = DOTween.To(() => displayedPressure, x => displayedPressure = x,
                                 targetPressure, sweepDuration)
-                            .SetEase(sweepEase);
+                            .SetEase(sweepEase).SetUpdate(true);
     }
 
     void ApplyNeedle()
@@ -117,14 +138,17 @@ public class PressureGaugeFeel : MonoBehaviour
         float baseAngle = Mathf.Lerp(angleAtZero, angleAtHundred, t);
 
         // Perlin-driven tremble, stronger as pressure climbs.
-        float amp = Mathf.Lerp(trembleAtZero, trembleAtHundred, t);
-        float jitter = (Mathf.PerlinNoise(Time.time * trembleSpeed, 0.37f) - 0.5f) * 2f * amp;
+        float amp = reducedMotion ? 0 : Mathf.Lerp(trembleAtZero, trembleAtHundred, t) * trembleMultiplier;
+        float jitter = (Mathf.PerlinNoise(motionTime * trembleSpeed, 0.37f) - 0.5f) * 2f * amp;
 
         needle.localEulerAngles = new Vector3(0f, 0f, baseAngle + jitter);
 
+        if (needleGraphic != null) needleGraphic.color = Color.Lerp(calmColor, crisisColor, t);
         if (needleImage != null)
             needleImage.color = Color.Lerp(calmColor, crisisColor, t);
     }
+
+    void OnDestroy() { sweepTween?.Kill(); transform.DOKill(); }
 
     static int ZoneOf(float pressure)
     {
