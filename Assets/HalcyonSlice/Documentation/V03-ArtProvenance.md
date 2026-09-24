@@ -4,7 +4,7 @@ Creative direction: Bergen Carloss. All selected generated images were created w
 
 | Runtime asset | Source / disposition |
 |---|---|
-| HalcyonArtV3/cover.png | Bergen’s supplied “ChatGPT Image Sep 23, 2026, 12_49_11 PM.png”; original authorship/publication provenance still to confirm. |
+| HalcyonArtV3/cover.png | Bergen’s supplied “ChatGPT Image Sep 23, 2026, 12_49_11 PM.png”; Bergen confirmed on September 24, 2026 that she created the original drawing and developed the final illustration using ChatGPT. |
 | HalcyonArtV3/ui-frame.png | exec-8fa5ed02-59cf-4bfe-9e90-2618df4ae656.png; generated indigo/gold interface material. |
 | HalcyonArtV3/portraits.png | exec-8d898249-db9c-448d-9ee9-a144eaaafc0f.png; revised three-column Molly/Lola/Alaric atlas. |
 | HalcyonArtV3/dorm.png | exec-cdb444ea-f688-43a2-ae8c-3bcc7fd5dc60.png; final painted room with enclosed exterior and compact academy. |

@@ -1,0 +1,13 @@
+First Weather v0.3.0 Mac release
+September 24, 2026
+
+Release page: https://github.com/bcarloss243/Game-Design-Repo-1-7.9.26/releases/tag/v0.3.0
+Asset: Halcyon-First-Weather-v0.3.0-Mac.zip
+Size: 110588678 bytes
+
+SHA-256:
+d3dd01cac46577abe06e55f10e545ebf606cccc8bcaa0cebdd7887635cb9094b  Halcyon-First-Weather-v0.3.0-Mac.zip
+
+ZIP CRC integrity passed for all 521 entries. Extracted app retained executable permissions and passed deep, strict signature verification. The archive includes the app, instructions, rules, credits, full notices, known issues, QA and rubric checklist. It does not contain the technical test save.
+
+See RELEASE-QA.md for actual standalone testing and remaining platform limits. This is an ad hoc signed, non-notarized Mac release.

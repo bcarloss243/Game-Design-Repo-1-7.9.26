@@ -1,0 +1,56 @@
+HALCYON ACADEMY: FIRST WEATHER
+Version 0.3.0 | September 24, 2026 | Bergen Carloss
+
+PLAY
+1. Extract the ZIP. Keep the application intact.
+2. Open “Halcyon Academy - First Weather.app”. Unity is not required.
+3. Choose “Begin a new story”. Begin at the Residence on the map.
+4. If the window is small, choose Window > Fill in the Mac menu bar.
+
+REQUIREMENTS
+macOS 12 or later. The app includes Apple Silicon and Intel executables.
+Tested on an Apple M3 Mac; Intel execution has not been tested.
+This download does not run on Windows, Android, or in a browser.
+
+FIRST LAUNCH
+This educational prototype is locally signed, but is not Apple notarized.
+macOS may block an app downloaded from the internet. If you trust this
+GitHub release, first try opening the app, then go to System Settings >
+Privacy & Security > Open Anyway and confirm the app you intended to open.
+Apple’s instructions: https://support.apple.com/en-au/102445
+Do not disable macOS security protections globally.
+
+CONTROLS
+Click a choice. Tab / Shift+Tab selects buttons; Enter activates them.
+Space turns a story page without choices. Esc pauses or resumes.
+J opens the journal. M toggles audio. Letter shortcuts stop while typing.
+Drag or scroll to explore the map and academy. Command + scroll zooms;
+visible zoom and recenter buttons are also available.
+Settings offers larger story text and reduced motion.
+Switching to another app automatically pauses the story; Esc resumes it.
+
+THE TWO-DAY STORY
+Attend class, choose a mentor, spend two afternoon activity slots, return
+home, and decide how to spend the evening. On day two, attend the assessment
+and find Lola in the greenhouse. Allocate six measures of water among three
+beds, then reconsider after the shade moves. Ask Lola for clues.
+
+Continue through Lola’s final message. “Complete · Garden Restored” and
+“Complete · Work in Progress” are both valid endings. Leaving a garden note
+lets you finish without solving it. There are no timed choices.
+Allow roughly 10–15 minutes for a first visit; reading speed and exploration
+vary. The representative route contains about 6–8 minutes of reading alone.
+
+SAVING AND QUITTING
+One automatic local save. Continue resumes it; Begin a new story replaces it.
+Use Pause > Quit, or Quit on the title screen, to leave safely.
+The download contains no test save. Saves belong to the Mac user account.
+Older prototype/editor saves may use a different app identity and may not
+appear in this version’s Continue option.
+
+Content note: family pressure and anxiety/panic described in text.
+Read Documentation/KNOWN ISSUES.txt for platform and prototype limitations.
+Credits and complete license notices are included and accessible in-game.
+
+DOWNLOAD PAGE
+https://github.com/bcarloss243/Game-Design-Repo-1-7.9.26/releases/tag/v0.3.0

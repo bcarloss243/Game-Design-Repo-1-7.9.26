@@ -1,5 +1,7 @@
 # First Weather v0.3 — verification record
 
+Historical editor record. For the September 24 packaged app, confirmed title credit, standalone playthrough and release limits, see [RELEASE-QA.md](RELEASE-QA.md). The packaging/provenance gates below describe the September 23 state and are superseded.
+
 September 23, 2026. Unity 6000.3.14f1, macOS editor on the development machine. No standalone build was created or tested for this revision.
 
 ## Automated evidence

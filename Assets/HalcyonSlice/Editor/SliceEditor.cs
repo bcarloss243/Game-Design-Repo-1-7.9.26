@@ -83,15 +83,20 @@ namespace Halcyon.FirstWeather.Editor
             if (EditorApplication.isPlaying) { Debug.LogWarning("Stop Play mode before building."); return; }
             Verify();
             if (!File.Exists(ScenePath)) OpenSlice();
-            string output = Path.GetFullPath("Builds/FirstWeather-Mac");
+            string output = Path.GetFullPath("Builds/FirstWeather-Mac-v0.3.0");
             Directory.CreateDirectory(output);
             string product = PlayerSettings.productName;
+            string company = PlayerSettings.companyName, version = PlayerSettings.bundleVersion;
+            string identifier = PlayerSettings.GetApplicationIdentifier(UnityEditor.Build.NamedBuildTarget.Standalone);
             int width = PlayerSettings.defaultScreenWidth, height = PlayerSettings.defaultScreenHeight;
             var mode = PlayerSettings.fullScreenMode;
             bool resize = PlayerSettings.resizableWindow;
             try
             {
                 PlayerSettings.productName = "Halcyon Academy - First Weather";
+                PlayerSettings.companyName = "Bergen Carloss";
+                PlayerSettings.bundleVersion = "0.3.0";
+                PlayerSettings.SetApplicationIdentifier(UnityEditor.Build.NamedBuildTarget.Standalone, "com.bergencarloss.halcyon.firstweather");
                 PlayerSettings.defaultScreenWidth = 1280; PlayerSettings.defaultScreenHeight = 720;
                 PlayerSettings.fullScreenMode = FullScreenMode.Windowed; PlayerSettings.resizableWindow = true;
                 var report = BuildPipeline.BuildPlayer(new BuildPlayerOptions
@@ -108,6 +113,8 @@ namespace Halcyon.FirstWeather.Editor
             finally
             {
                 PlayerSettings.productName = product;
+                PlayerSettings.companyName = company; PlayerSettings.bundleVersion = version;
+                PlayerSettings.SetApplicationIdentifier(UnityEditor.Build.NamedBuildTarget.Standalone, identifier);
                 PlayerSettings.defaultScreenWidth = width; PlayerSettings.defaultScreenHeight = height;
                 PlayerSettings.fullScreenMode = mode; PlayerSettings.resizableWindow = resize;
             }

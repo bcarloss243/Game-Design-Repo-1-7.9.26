@@ -1,0 +1,30 @@
+KNOWN ISSUES AND LIMITATIONS — FIRST WEATHER v0.3.0
+
+No game-breaking defect was observed in the complete standalone playthrough
+on the development Mac. This is limited test evidence, not a guarantee.
+
+- Mac only, macOS 12+. Apple M3 execution tested. Intel binaries are included,
+  but execution on Intel and first launch on a second Mac remain untested.
+- Not Apple notarized. A downloaded copy may need the per-app Open Anyway
+  approval described in START HERE.txt. A managed school Mac may prevent it.
+- Retina displays may open a small initial window. Choose Window > Fill,
+  resize the window, or use the green full-screen control for easier reading.
+- The layout uses a 16:9 safe area; other shapes may have letterboxing.
+- One local save. Starting a new story replaces it. Saves from older releases
+  or the Unity editor may use a different app identity.
+- Switching apps pauses automatically. Return to the game and press Esc.
+- The world uses layered 2D paintings and ambient animation. It is not a
+  freely rotatable 3D city. Two student designs and simple poses repeat.
+- The two-day slice is complete. Wider Ward travel, the full quarter,
+  long-term project systems and later story arcs are outside this prototype.
+- Story text and synthesized audio remain prototype material.
+- Native trackpad comfort and broader display/accessibility coverage still
+  benefit from human testing; engineering checks do not establish comfort.
+- Unity logged thread-finalization and ComputeBuffer disposal warnings at
+  shutdown. No crash, lost save, or blocked progression accompanied them in
+  this test. The build also reported a Unity Services symbol-upload warning;
+  cloud debug-symbol upload was unavailable, but the app built and ran.
+
+If progress seems unclear, open How to play or check the map’s timetable.
+Both Garden Restored and Work in Progress finish the game. Garden hints and
+leaving a note are supported options, with no timed input requirement.

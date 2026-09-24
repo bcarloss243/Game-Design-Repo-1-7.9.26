@@ -1,6 +1,6 @@
-# Halcyon Academy · First Weather — v0.3
+# Halcyon Academy · First Weather — v0.3.0
 
-A two-day playable Unity narrative prototype directed by Bergen Carloss. This revision stays in Unity and GitHub. No new executable or ZIP is produced until Bergen approves this phase.
+A two-day playable Unity narrative prototype directed by Bergen Carloss. The compiled Mac prototype is available from the [v0.3.0 release](https://github.com/bcarloss243/Game-Design-Repo-1-7.9.26/releases/tag/v0.3.0). Extract the ZIP and open the app; Unity is not required. macOS 12+, with Apple Silicon and Intel binaries; execution tested on Apple M3. See the package’s START HERE and KNOWN ISSUES for first-launch and compatibility details.
 
 ## Play in Unity
 
@@ -30,6 +30,6 @@ Edit `Assets/HalcyonSlice/Narrative/FirstWeather.ink`. See `WRITING-GUIDE.md` fo
 
 Current automated evidence lives in V03-Rules.txt, V03-Screens.txt, V03-Playthrough.txt, V03-Fallback-Playthrough.txt, AcademyVerification.txt and MapInterfaceVerification.txt. Reports include their own timestamps. Earlier Verification.txt and UI reports describe older versions. Automated runs do not replace the three human playtests required by the assignment.
 
-The slice does not implement the full quarter calendar, all Ward travel, dependency/endgame arcs, or late revelations. Seeded material is listed in REVISION-CHECKLIST.md. The student atlas contains two repeating painted designs and simple four-frame poses; it is not a finished crowd animation library. Room ambience is subtle and the audio is synthesized prototype material. The title-reference publication provenance must be confirmed before distribution. The human feedback, reflection and video materials have explicit completion requirements in their respective documents.
+The slice does not implement the full quarter calendar, all Ward travel, dependency/endgame arcs, or late revelations. Seeded material is listed in REVISION-CHECKLIST.md. The student atlas contains two repeating painted designs and simple four-frame poses; it is not a finished crowd animation library. Room ambience is subtle and the audio is synthesized prototype material. Bergen confirmed the title began as an original drawing and the final illustration was developed with ChatGPT; credits record this. The human feedback, reflection and video materials have explicit completion requirements in their respective documents.
 
-Do not use the existing Build Mac Prototype menu until packaging has been approved. The repository’s earlier downloadable build does not represent this revision.
+The v0.3.0 release supersedes the earlier downloads. Build Mac Prototype exports the app; local signing and ZIP packaging are described in RELEASE-QA.md. The app is not Apple notarized. See RUBRIC-CHECKLIST.md for game evidence and Bergen’s separate reflection/playtest/video requirements.

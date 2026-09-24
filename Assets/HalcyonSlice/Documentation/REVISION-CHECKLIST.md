@@ -1,6 +1,6 @@
 # First Weather v0.3 implementation audit
 
-Authority: Bergen's September 23 request and supplied comprehensive critique. The two-day slice stays the scope; seeds are represented without exposing later plot reveals. User approval precedes packaging. Story text remains an editable working draft for Bergen.
+Authority: Bergen's September 23 request and supplied comprehensive critique. The two-day slice stays the scope; seeds are represented without exposing later plot reveals. Bergen authorized final packaging on September 24. Story text remains an editable working draft for Bergen.
 
 Status key: TODO / IMPLEMENTED / VERIFIED / HUMAN INPUT / DEFERRED BY CRITIQUE.
 
@@ -37,7 +37,8 @@ Status key: TODO / IMPLEMENTED / VERIFIED / HUMAN INPUT / DEFERRED BY CRITIQUE.
 | Assignment | Start/quit/pause/finish/result; credits/licenses; known issues; Unity playthrough | IMPLEMENTED; verification sources below |
 | Assignment | Three genuine human playtests and feedback | HUMAN INPUT; supplied themes recorded without invented participants; three documented sessions still required |
 | Assignment | Iteration journal, one-page reflection, 5-minute pitch script | DRAFTED; Bergen must personalize reflection and record the video |
-| Assignment | Compiled download and pitch-video URL | DEFERRED BY USER; no packaging or publication of video |
+| Assignment | Compiled download | v0.3.0 Mac ZIP; see RELEASE-QA.md and RUBRIC-CHECKLIST.md |
+| Assignment | Pitch-video URL | HUMAN INPUT; Bergen must record and provide the video |
 
 
 ## Evidence and boundaries
@@ -48,5 +49,5 @@ Status key: TODO / IMPLEMENTED / VERIFIED / HUMAN INPUT / DEFERRED BY CRITIQUE.
 - Presentation: `HalcyonStationery.cs`, `HalcyonGamePresentation.cs`, `AcademyCourtyard.cs`, `HalcyonSceneLife.cs`. Painted assets use the September title as direction. The final coherent court removes visible sky and mismatched neighboring scale; the map and room views were corrected as well. Figures are painted sprite poses, not geometric blocks. Other rooms use ambient light/reflection motion, not full skeletal character animation. The static comic gutter is implemented at the threshold sequence.
 - Persistence/writing: Ink source + native compiler/runtime, idempotent state events, v1 backup/migration, first-person automatic notes and typed journal. See WRITING-GUIDE.md for supported Ink shape; this wrapper is not an arbitrary branching Ink editor.
 - Engineering evidence: V03-Rules.txt (route, Ink, font, state checks), V03-Screens.txt (runtime page/modal layout), V03-Playthrough.txt and V03-Fallback-Playthrough.txt (actual UI button route runs), AcademyVerification.txt and MapInterfaceVerification.txt (motion/navigation/gating/layout). Use each report’s timestamp; old v0.2 reports remain historical.
-- Assignment: title/new/continue/quit/pause/completion/results and credits/notices are implemented. Human test records are not complete. Reflection and pitch script are honest drafts; recording, URL and compiled packaging await Bergen’s review. The supplied feedback alone cannot satisfy the three-session requirement.
+- Assignment: title/new/continue/quit/pause/completion/results and credits/notices are implemented. Human test records are not complete. Reflection and pitch script are honest drafts; the video recording and URL remain Bergen’s separate work. The compiled Mac release is covered in RELEASE-QA.md. The supplied feedback alone cannot satisfy the three-session requirement.
 - Creative sign-off: matching an image reference and responding to every critique item does not prove that the experience feels compelling or alive to a player. Bergen’s art/dialogue review and the three documented playtests remain the acceptance gate.

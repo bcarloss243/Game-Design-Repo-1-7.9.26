@@ -1,5 +1,11 @@
 # Change log
 
+## First Weather v0.3.0 packaged prototype — September 24, 2026
+
+Packages the revised two-day game as a universal Mac application with versioned app identity. Updates the art credit to recognize Bergen’s original drawing and ChatGPT development. Bundles installation/rules, known issues, full notices, release QA and the rubric checklist.
+
+Build succeeded with zero errors and one Unity Services symbol-upload warning. The ad hoc signed app completed both days to Garden Restored on Apple M3, including quit/relaunch/continue, retained journal text and accessibility controls. Intel execution and Apple notarization remain outside this verification. The source and compiled ZIP are available from the v0.3.0 GitHub release. Reflection, three documented human playtests and the pitch video remain separate submissions.
+
 ## First Weather v0.3 — September 23, 2026
 
 The previous illustrations and default-looking interface did not carry the new title’s painted style. The academy also read as a miniature against its surroundings, and geometric walkers undermined the world’s scale. This revision repaints the scenes, corrects the complete courtyard perspective, replaces walkers with painted poses sized to the doors, and applies indigo/gold materials and new typography across the interface. Outside weather is concealed in the playable room/courtyard views; the district now depicts the same compact academy.

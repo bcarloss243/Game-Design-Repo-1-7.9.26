@@ -1,0 +1,31 @@
+HALCYON ACADEMY: FIRST WEATHER — CREDITS
+
+Concept, world, characters, original drawing and creative direction
+Bergen Carloss
+
+Illustrations
+Original drawing and art direction by Bergen Carloss. Final title
+illustration developed with ChatGPT. Environments, portraits, student
+sprites and interface materials generated with OpenAI image generation
+under Bergen’s direction, using the supplied artwork as reference.
+
+Prototype programming, working dialogue draft and original synthesized audio
+OpenAI Codex, under Bergen’s direction. Dialogue remains an editable draft
+for Bergen. No commercial music recordings were added.
+
+Typography
+Cinzel Decorative — Natanael Gama
+Cormorant Garamond — Christian Thalmann and the Cormorant Project Authors
+SIL Open Font License 1.1. Full notices in ThirdPartyNotices.txt.
+
+Technology
+Unity 6.3 LTS; Unity UI, TextMesh Pro and Input System.
+Ink — inkle. DOTween — Demigiant.
+FMOD — Firelight Technologies Pty Ltd.
+Other included dependencies retain their notices in ThirdPartyNotices.txt.
+This slice uses original Unity-generated audio; the preexisting FMOD
+integration remains in the project and the distribution.
+
+Copyright 2026 Bergen Carloss for original project contributions.
+Third-party components retain their own copyrights and licenses.
+A fictional city inspired by New Orleans; not a historical reconstruction.
